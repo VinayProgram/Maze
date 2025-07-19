@@ -1,9 +1,10 @@
 import { Canvas } from '@react-three/fiber'
 import { KeyboardControls, OrbitControls, Sky, type KeyboardControlsEntry } from '@react-three/drei'
-import Player from './player/player'
-import React from 'react'
-import Maze from './levels/level1'
+import React, { useRef } from 'react'
+import {Maze} from './levels/level1'
 import { ControlsEnum } from './store/constants'
+import { Player, ThirdPersonCamera } from './player/player'
+import * as THREE from 'three'
 
 const Editor = () => {
   const map = React.useMemo<KeyboardControlsEntry<ControlsEnum>[]>(()=>[
@@ -13,16 +14,19 @@ const Editor = () => {
     { name: ControlsEnum.right, keys: ['ArrowRight', 'KeyD'] }, 
     { name: ControlsEnum.jump, keys: ['Space'] },
   ], [])
+  const playerRef = useRef<THREE.Group>(null!)
+  const mazeRef = useRef<THREE.Group>(null!)
   return (
     <div className='w-full h-screen'>
       <KeyboardControls
         map={map}>
         <Canvas >
-          <Player />
           <Sky sunPosition={[100, 20, 100]} />
           <ambientLight intensity={1} />
-          <directionalLight position={[1, 1, 1]} intensity={1} />
-          <Maze/>
+          <directionalLight position={[5, 10, 5]} />
+          <Player playerRef={playerRef} />
+          <ThirdPersonCamera playerRef={playerRef} mazeRef={mazeRef} />
+          <Maze mazeRef={mazeRef}/>
           <OrbitControls />
         </Canvas>
       </KeyboardControls>
