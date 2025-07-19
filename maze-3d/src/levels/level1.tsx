@@ -1,59 +1,27 @@
 import { Box } from '@react-three/drei'
 import * as THREE from 'three'
 
-const mazeData = [
+const mazeData: MazeCell[][] = [
   [
-    {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}
+    {type:'wall'},
+    {type:'path'},
+    {type:'wall'},
+    {type:'wall'},
+    {type:'wall'},
+    {type:'wall'},
   ],
   [
-    {"type": "wall"}, {"type": "path", "isStart": true}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}
+    {type:'wall'},
+    {type:'path',isPortal:true},
+    {type:'wall'},
+    {type:'wall'},
+    {type:'wall'},
+    {type:'wall',isHazard:true},
   ],
   [
-    {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}
-  ],
-  [
-    {"type": "wall"}, {"type": "path", "isPortal": true}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}
-  ],
-  [
-    {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}
-  ],
-  [
-    {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}
-  ],
-  [
-    {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}
-  ],
-  [
-    {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path", "isHazard": true}, {"type": "path", "isHazard": true}, {"type": "path", "isHazard": true}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}
-  ],
-  [
-    {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}
-  ],
-  [
-    {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}
-  ],
-  [
-    {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}
-  ],
-  [
-    {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}
-  ],
-  [
-    {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}
-  ],
-  [
-    {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}
-  ],
-  [
-    {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}
-  ],
-  [
-    {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path", "isEnd": true}, {"type": "path"}, {"type": "wall"}
-  ],
-  [
-    {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}
+    {type:'wall'},
+    {type:'path'}]
   ]
-]
 
 // 1. Import the new JSON data file
 
