@@ -3,6 +3,7 @@ import { KeyboardControls, OrbitControls, Sky, type KeyboardControlsEntry } from
 import Player from './player/player'
 import * as THREE from 'three'
 import React from 'react'
+import Maze from './levels/level1'
 
 const Editor = () => {
   const map = React.useMemo<KeyboardControlsEntry<ControlsEnum>[]>(()=>[
@@ -18,16 +19,16 @@ const Editor = () => {
         map={map}>
         <Canvas >
           {/* <Environment background preset='sunset' ground/> */}
-          <mesh rotation={[-Math.PI / 2, 0, 0]}>
+          {/* <mesh rotation={[-Math.PI / 2, 0, 0]}>
             <planeGeometry args={[100, 100, 100]} />
             <meshBasicMaterial color='green' side={THREE.DoubleSide} />
-          </mesh>
+          </mesh> */}
           <Player />
 
           <Sky sunPosition={[100, 20, 100]} />
           <ambientLight intensity={1} />
           <directionalLight position={[1, 1, 1]} intensity={1} />
-          {/* <LevelOne/> */}
+          <Maze/>
           <OrbitControls />
         </Canvas>
       </KeyboardControls>

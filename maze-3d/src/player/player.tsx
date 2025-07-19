@@ -40,8 +40,8 @@ const Player = () => {
 
   return (
     <group ref={playerRef}>
-    <PerspectiveCamera makeDefault position={[0, 100, -10]} />
-    <primitive object={fbx} position={[0, 0, 0]} scale={0.1} />
+    <PerspectiveCamera makeDefault position={[0, 0.01, -10]} />
+    <primitive object={fbx} position={[0, 0, 0]} scale={0.001} />
     </group>
   )
 }
