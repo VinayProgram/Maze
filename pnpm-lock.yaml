@@ -14,6 +14,9 @@ importers:
       '@react-three/fiber':
         specifier: ^9.2.0
         version: 9.2.0(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(three@0.178.0)
+      '@react-three/rapier':
+        specifier: ^2.1.0
+        version: 2.1.0(@react-three/fiber@9.2.0(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(three@0.178.0))(react@19.1.0)(three@0.178.0)
       '@tailwindcss/vite':
         specifier: ^4.1.11
         version: 4.1.11(vite@7.0.5(jiti@2.4.2)(lightningcss@1.30.1))
@@ -85,6 +88,9 @@ packages:
 
   '@dimforge/rapier3d-compat@0.12.0':
     resolution: {integrity: sha512-uekIGetywIgopfD97oDL5PfeezkFpNhwlzlaEYNOA0N6ghdsOvh/HYjSMek5Q2O1PYvRSDFcqFVJl4r4ZBwOow==}
+
+  '@dimforge/rapier3d-compat@0.15.0':
+    resolution: {integrity: sha512-TRH9rmF6RJqvKt0xis6VkToJHz4Pf54IfYhKGWn7zkpTWPwVyQ4p9kjwrdm6jOfGn72MBrIbttzvDB/ZOqE7sg==}
 
   '@esbuild/aix-ppc64@0.25.6':
     resolution: {integrity: sha512-ShbM/3XxwuxjFiuVBHA+d3j5dyac0aEVVq1oluIDf71hUw0aRF59dV/efUsIwFnR6m8JNM2FjZOzmaZ8yG61kw==}
@@ -372,6 +378,13 @@ packages:
         optional: true
       react-native:
         optional: true
+
+  '@react-three/rapier@2.1.0':
+    resolution: {integrity: sha512-o1VzgCEILnc4noF4t5WNPYCy6dh0bTcd0Fa/xZa5/LBDnjYMb2mlWX6f+wMck5ucdz2BsVV+tpYWTGvb72QRIA==}
+    peerDependencies:
+      '@react-three/fiber': ^9.0.4
+      react: ^19
+      three: '>=0.159.0'
 
   '@rolldown/pluginutils@1.0.0-beta.11':
     resolution: {integrity: sha512-L/gAA/hyCSuzTF1ftlzUSI/IKr2POHsv1Dd78GfqkR83KMNuswWD61JxGV2L7nRwBBBSDr6R1gCkdTmoN7W4ag==}
@@ -1542,6 +1555,8 @@ snapshots:
 
   '@dimforge/rapier3d-compat@0.12.0': {}
 
+  '@dimforge/rapier3d-compat@0.15.0': {}
+
   '@esbuild/aix-ppc64@0.25.6':
     optional: true
 
@@ -1768,6 +1783,15 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
       - immer
+
+  '@react-three/rapier@2.1.0(@react-three/fiber@9.2.0(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(three@0.178.0))(react@19.1.0)(three@0.178.0)':
+    dependencies:
+      '@dimforge/rapier3d-compat': 0.15.0
+      '@react-three/fiber': 9.2.0(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(three@0.178.0)
+      react: 19.1.0
+      suspend-react: 0.1.3(react@19.1.0)
+      three: 0.178.0
+      three-stdlib: 2.36.0(three@0.178.0)
 
   '@rolldown/pluginutils@1.0.0-beta.11': {}
 

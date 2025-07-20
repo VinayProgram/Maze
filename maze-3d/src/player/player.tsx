@@ -4,8 +4,9 @@ import * as THREE from 'three'
 import { useEffect, useRef } from 'react'
 import { useKeyboardControls } from '@react-three/drei'
 import type { ControlsEnum } from '../store/constants'
+import { CuboidCollider, RigidBody, type RapierRigidBody } from '@react-three/rapier'
 
-const Player = ({ playerRef }: { playerRef: React.RefObject<THREE.Group> }) => {
+const Player = ({ RigidRef , playerRef}: { RigidRef: React.RefObject<RapierRigidBody>, playerRef: React.RefObject<THREE.Group> }) => {
   const fbx = useLoader(FBXLoader, '/Walking.fbx')
   const mixer = useRef<THREE.AnimationMixer>(null)
   const forwardPressed = useKeyboardControls<ControlsEnum>(s => s.ArrowUp)
@@ -13,45 +14,47 @@ const Player = ({ playerRef }: { playerRef: React.RefObject<THREE.Group> }) => {
   const leftPressed = useKeyboardControls<ControlsEnum>(s => s.ArrowLeft)
   const rightPressed = useKeyboardControls<ControlsEnum>(s => s.ArrowRight)
   const direction = useRef(new THREE.Vector3())
-
+  const scene = useThree((state) => state.scene)
+ 
   useEffect(() => {
     if (fbx.animations.length > 0) {
       mixer.current = new THREE.AnimationMixer(fbx)
     }
   }, [fbx])
+ useFrame((_state,delta)=>{
+  const rigid = RigidRef.current
+  if(rigid){
+    if(forwardPressed) {
+      rigid.setLinvel({x:0,y:0,z:1},true)
+    }
+    if(backwardPressed) {
+      rigid.setLinvel({x:0,y:0,z:-1},true)
+    }
+    if(leftPressed) {
+      rigid.setLinvel({x:-1,y:0,z:0},true)
+    }
+    if(rightPressed) {
+      rigid.setLinvel({x:1,y:0,z:0},true)
+    }
 
-  useFrame((state, delta) => {
-    const player = playerRef.current
-    if (!player) return
-
-    player.getWorldDirection(direction.current)
-
-
-    if (leftPressed) player.rotation.y += 0.03
-    if (rightPressed) player.rotation.y -= 0.03
-
-    const moveVector = direction.current.clone().normalize()
-    if (forwardPressed) player.position.add(moveVector.multiplyScalar(0.05))
-    if (backwardPressed) player.position.sub(moveVector.multiplyScalar(0.05))
-
-    const anyKey = forwardPressed || backwardPressed || leftPressed || rightPressed
-
+    const anyKeyPressed = forwardPressed || backwardPressed || leftPressed || rightPressed
     if (mixer.current && fbx.animations.length > 0) {
       const action = mixer.current.clipAction(fbx.animations[0])
-      if (anyKey) {
+      if (anyKeyPressed) {
         if (!action.isRunning()) action.play()
       } else {
         action.stop()
       }
       mixer.current.update(delta)
     }
-  })
+  }
+ }) 
 
   return (
-    <group ref={playerRef}>
-      <primitive object={fbx} position={[0, 0, 0]} scale={0.001} />
-     {playerRef.current && direction.current && <arrowHelper  args={[direction.current, playerRef.current.position, 1, 'orange']}/>}
-    </group>
+    <RigidBody ref={RigidRef} colliders={false} mass={1}>
+    <CuboidCollider args={[0.10, 0.01, 0.10]} />
+    <primitive ref={playerRef} object={fbx} position={[0, 0, 0]} scale={0.001} />
+  </RigidBody>
   )
 }
 

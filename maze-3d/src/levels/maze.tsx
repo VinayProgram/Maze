@@ -1,9 +1,10 @@
 import { Box } from '@react-three/drei'
+import {  CuboidCollider, RigidBody } from '@react-three/rapier';
 import * as THREE from 'three'
 
 const mazeData: MazeCell[][] = [
   [
-    {type:'wall'},
+    {type:'path'},
     {type:'path'},
     {type:'wall'},
     {type:'wall'},
@@ -12,7 +13,7 @@ const mazeData: MazeCell[][] = [
   ],
   [
     {type:'wall'},
-    {type:'path',isPortal:true},
+    {type:'path',isStart:true},
     {type:'wall'},
     {type:'wall'},
     {type:'wall'},
@@ -39,25 +40,25 @@ const maze = mazeData as MazeCell[][];
 
 export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => {
   return (
+
+  <RigidBody type="fixed" friction={2} restitution={0.5} colliders={false} >
     <group ref={mazeRef}>
       {maze.map((row, rowIndex) =>
         row.map((cell, colIndex) => {
           // 3. Render based on the 'type' property
           if (cell.type === 'wall') {
-            return (
-              // Wall
+            return (      
+              <RigidBody> 
               <Box
-                key={`${rowIndex}-${colIndex}`}
                 position={[colIndex, 0.5, rowIndex]} // Standard 1x1x1 cube
                 args={[1, 1, 1]}
               >
                 <meshStandardMaterial color="#555555" />
               </Box>
+              </RigidBody>
             );
           }
           
-          // 4. If it's a path, check for special zones and render a visual cue
-          // These are flat planes on the ground to mark the zone.
           if (cell.isStart) {
             return (
               <Box
@@ -108,10 +109,19 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
           }
 
           // It's just a regular path, so render nothing
-          return null;
+          return (
+              <Box
+                position={[colIndex, 0.01, rowIndex]}
+                args={[1, 0.02, 1]}
+              >
+                <meshStandardMaterial color="white" emissive="white" />
+              </Box>
+          )
         })
       )}
     </group>
+    <CuboidCollider args={[10, 2, 10]} position={[0, -2, 0]} />
+      </RigidBody>
   );
 };
 
