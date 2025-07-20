@@ -17,9 +17,14 @@ const Player = ({ RigidRef, playerRef }: { RigidRef: React.RefObject<RapierRigid
   const angle = useRef(0) // Track Y-axis angle
   const quaternion = new THREE.Quaternion()
   const up = new THREE.Vector3(0, 1, 0)
+  const scene = useThree((state) => state.scene)
   useEffect(() => {
     if (fbx.animations.length > 0) {
       mixer.current = new THREE.AnimationMixer(fbx)
+    }
+    const start = scene.getObjectByName('start')
+    if(start) {
+      RigidRef.current.setTranslation({x:start.position.x,y:start.position.y+0.01,z:start.position.z},true)
     }
   }, [fbx])
   useFrame((_state,delta) => {
@@ -70,15 +75,18 @@ const Player = ({ RigidRef, playerRef }: { RigidRef: React.RefObject<RapierRigid
 
 
 
-
-const ThirdPersonCamera = ({ rigidBody, mazeRef }: {
-  rigidBody: React.RefObject<RapierRigidBody>,
+const ThirdPersonCamera = ({
+  rigidBody,
+  mazeRef,
+}: {
+  rigidBody: React.RefObject<RapierRigidBody>
   mazeRef: React.RefObject<THREE.Group>
 }) => {
   const { camera } = useThree()
-  const offset = new THREE.Vector3(0, 1, -2) // desired offset (can adjust)
+  const offset = new THREE.Vector3(0, 1, -2)
   const desiredCameraPos = useRef(new THREE.Vector3())
   const safeCameraPos = useRef(new THREE.Vector3())
+  const currentLookAt = useRef(new THREE.Vector3())
   const raycaster = new THREE.Raycaster()
 
   useFrame(() => {
@@ -86,18 +94,16 @@ const ThirdPersonCamera = ({ rigidBody, mazeRef }: {
     const maze = mazeRef.current
     if (!player || !maze) return
 
-    // Convert Rapier data to THREE types
+    // 1. Player position and quaternion
     const playerPos = new THREE.Vector3().copy(player.translation())
     const playerQuat = new THREE.Quaternion().copy(player.rotation())
 
-    // Calculate desired camera offset based on player orientation
+    // 2. Calculate camera offset from player orientation
     const rotatedOffset = offset.clone().applyQuaternion(playerQuat)
     desiredCameraPos.current.copy(playerPos).add(rotatedOffset)
 
-    // Direction from player to desired camera position
+    // 3. Raycast to check for collisions
     const direction = desiredCameraPos.current.clone().sub(playerPos).normalize()
-
-    // Raycast from player to desired camera
     raycaster.set(playerPos, direction)
     raycaster.far = offset.length()
 
@@ -105,15 +111,18 @@ const ThirdPersonCamera = ({ rigidBody, mazeRef }: {
 
     if (intersects.length > 0) {
       const hitPoint = intersects[0].point
-      const buffer = 0.2
-      safeCameraPos.current.copy(hitPoint).add(direction.clone().multiplyScalar(-buffer))
+      const buffer = 0.5
+      safeCameraPos.current.copy(hitPoint).add(direction.clone().multiplyScalar(-buffer)).lerp(desiredCameraPos.current,0.08)
     } else {
-      safeCameraPos.current.copy(desiredCameraPos.current)
+      safeCameraPos.current.copy(desiredCameraPos.current).lerp(playerPos,0.08)
     }
 
-    // Smoothly update the camera
-    camera.position.lerp(safeCameraPos.current, 0.1)
-    camera.lookAt(playerPos)
+    // 4. Lerp camera position
+    camera.position.lerp(safeCameraPos.current, 0.08)
+
+    // 5. Smooth lookAt
+    currentLookAt.current.lerp(playerPos, 0.1)
+    camera.lookAt(currentLookAt.current)
   })
 
   return null

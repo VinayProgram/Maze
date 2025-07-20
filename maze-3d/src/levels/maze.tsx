@@ -1,29 +1,61 @@
 import { Box } from '@react-three/drei'
 import {  CuboidCollider, RigidBody } from '@react-three/rapier';
+import { useEffect, useRef } from 'react';
 import * as THREE from 'three'
 
 const mazeData: MazeCell[][] = [
   [
-    {type:'path'},
-    {type:'path'},
-    {type:'wall'},
-    {type:'wall'},
-    {type:'wall'},
-    {type:'wall'},
+    {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}
   ],
   [
-    {type:'wall'},
-    {type:'path',isStart:true},
-    {type:'wall'},
-    {type:'wall'},
-    {type:'wall'},
-    {type:'wall',isHazard:true},
+    {"type": "wall"}, {"type": "path", "isStart": true}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}
   ],
   [
-    {type:'wall'},
-    {type:'path'}]
+    {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}
+  ],
+  [
+    {"type": "wall"}, {"type": "path", "isPortal": true}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}
+  ],
+  [
+    {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}
+  ],
+  [
+    {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}
+  ],
+  [
+    {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}
+  ],
+  [
+    {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path", "isHazard": true}, {"type": "path", "isHazard": true}, {"type": "path", "isHazard": true}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}
+  ],
+  [
+    {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}
+  ],
+  [
+    {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}
+  ],
+  [
+    {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}
+  ],
+  [
+    {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}
+  ],
+  [
+    {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}
+  ],
+  [
+    {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}
+  ],
+  [
+    {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}
+  ],
+  [
+    {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "wall"}, {"type": "path"}, {"type": "path"}, {"type": "path"}, {"type": "path", "isEnd": true}, {"type": "path"}, {"type": "wall"}
+  ],
+  [
+    {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "wall"}, {"type": "path"}, {"type": "wall"}
   ]
-
+]
 // 1. Import the new JSON data file
 
 // 2. Define a TypeScript interface for a maze cell for type safety
@@ -39,6 +71,18 @@ interface MazeCell {
 const maze = mazeData as MazeCell[][];
 
 export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => {
+  const boundingBox = useRef<THREE.Box3>(new THREE.Box3())
+ 
+  useEffect(() => {
+    const maze = mazeRef.current
+    if(!maze || !boundingBox.current) return
+    maze.traverse((child) => {
+      if(child instanceof THREE.Mesh) {
+        boundingBox.current.expandByObject(child)
+      }
+    })
+    console.log(boundingBox.current)
+  },[mazeRef])
   return (
     <group ref={mazeRef}>
       {maze.map((row, rowIndex) =>
@@ -117,7 +161,7 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
           )
         })
       )}
-      <CuboidCollider args={[10, 2, 10]} position={[0, -2, 0]} />
+      <CuboidCollider args={[100,2,100]} position={[0, -2, 0]} />
     </group>
   );
 };
