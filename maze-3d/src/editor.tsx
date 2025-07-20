@@ -28,7 +28,7 @@ const Editor = () => {
           <ambientLight intensity={1} />
           <directionalLight position={[5, 10, 5]} />
           <Player RigidRef={rigidRef} playerRef={playerRef} />
-          <ThirdPersonCamera playerRef={playerRef} mazeRef={mazeRef} />
+          <ThirdPersonCamera rigidBody={rigidRef} mazeRef={mazeRef} />
           <Maze mazeRef={mazeRef}/>
           <OrbitControls />
           </Physics>

@@ -40,15 +40,13 @@ const maze = mazeData as MazeCell[][];
 
 export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => {
   return (
-
-  <RigidBody type="fixed" friction={2} restitution={0.5} colliders={false} >
     <group ref={mazeRef}>
       {maze.map((row, rowIndex) =>
         row.map((cell, colIndex) => {
           // 3. Render based on the 'type' property
           if (cell.type === 'wall') {
             return (      
-              <RigidBody> 
+              <RigidBody type="fixed" friction={2} restitution={0.5} > 
               <Box
                 position={[colIndex, 0.5, rowIndex]} // Standard 1x1x1 cube
                 args={[1, 1, 1]}
@@ -119,9 +117,8 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
           )
         })
       )}
+      <CuboidCollider args={[10, 2, 10]} position={[0, -2, 0]} />
     </group>
-    <CuboidCollider args={[10, 2, 10]} position={[0, -2, 0]} />
-      </RigidBody>
   );
 };
 
