@@ -161,7 +161,8 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
           )
         })
       )}
-      <CuboidCollider args={[100,2,100]} position={[0, -2, 0]} />
+      <CuboidCollider args={[16,2,16]} position={[0, -2, 0]} />
+
     </group>
   );
 };
