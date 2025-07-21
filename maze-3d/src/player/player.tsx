@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react'
 import { useKeyboardControls } from '@react-three/drei'
 import type { ControlsEnum } from '../store/constants'
 import { CuboidCollider, RigidBody, type RapierRigidBody } from '@react-three/rapier'
+import { Vector3 } from 'three'
 
 const Player = ({ RigidRef, playerRef }: { RigidRef: React.RefObject<RapierRigidBody>, playerRef: React.RefObject<THREE.Group> }) => {
   const fbx = useLoader(FBXLoader, '/Walking.fbx')
@@ -82,47 +83,15 @@ const ThirdPersonCamera = ({
   rigidBody: React.RefObject<RapierRigidBody>
   mazeRef: React.RefObject<THREE.Group>
 }) => {
-  const { camera } = useThree()
-  const offset = new THREE.Vector3(0, 1, -2)
-  const desiredCameraPos = useRef(new THREE.Vector3())
-  const safeCameraPos = useRef(new THREE.Vector3())
-  const currentLookAt = useRef(new THREE.Vector3())
-  const raycaster = new THREE.Raycaster()
 
-  useFrame(() => {
+  useFrame((state) => {
     const player = rigidBody.current
     const maze = mazeRef.current
     if (!player || !maze) return
-
-    // 1. Player position and quaternion
-    const playerPos = new THREE.Vector3().copy(player.translation())
-    const playerQuat = new THREE.Quaternion().copy(player.rotation())
-
-    // 2. Calculate camera offset from player orientation
-    const rotatedOffset = offset.clone().applyQuaternion(playerQuat)
-    desiredCameraPos.current.copy(playerPos).add(rotatedOffset)
-
-    // 3. Raycast to check for collisions
-    const direction = desiredCameraPos.current.clone().sub(playerPos).normalize()
-    raycaster.set(playerPos, direction)
-    raycaster.far = offset.length()
-
-    const intersects = raycaster.intersectObjects(maze.children, true)
-
-    if (intersects.length > 0) {
-      const hitPoint = intersects[0].point
-      const buffer = 0.5
-      safeCameraPos.current.copy(hitPoint).add(direction.clone().multiplyScalar(-buffer)).lerp(desiredCameraPos.current,0.08)
-    } else {
-      safeCameraPos.current.copy(desiredCameraPos.current).lerp(playerPos,0.08)
-    }
-
-    // 4. Lerp camera position
-    camera.position.lerp(safeCameraPos.current, 0.08)
-
-    // 5. Smooth lookAt
-    currentLookAt.current.lerp(playerPos, 0.1)
-    camera.lookAt(currentLookAt.current)
+    const offset = new Vector3(0, 0.60, -1).applyQuaternion(player.rotation());
+    const cameraPosition =  new Vector3().copy(player.translation()).add(offset);
+    state.camera.position.copy(cameraPosition);
+    state.camera.lookAt(new Vector3().copy(player.translation()));
   })
 
   return null
