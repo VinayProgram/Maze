@@ -23,7 +23,7 @@ const Editor = () => {
       <KeyboardControls
         map={map}>
         <Canvas >
-          <Physics   gravity={[0,-40,0]}>
+          <Physics >
           <Sky sunPosition={[100, 20, 100]} />
           <ambientLight intensity={1} />
           <directionalLight position={[5, 10, 5]} />
