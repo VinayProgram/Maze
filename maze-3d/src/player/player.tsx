@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react'
 import { useKeyboardControls } from '@react-three/drei'
 import type { ControlsEnum } from '../store/constants'
 import { CuboidCollider, RigidBody, type RapierRigidBody } from '@react-three/rapier'
-import { Vector3 } from 'three'
+// import { Vector3 } from 'three'
 
 const Player = ({ RigidRef, playerRef }: { RigidRef: React.RefObject<RapierRigidBody>, playerRef: React.RefObject<THREE.Group> }) => {
   const fbx = useLoader(FBXLoader, '/Walking.fbx')
@@ -51,7 +51,8 @@ const Player = ({ RigidRef, playerRef }: { RigidRef: React.RefObject<RapierRigid
   
     quaternion.setFromAxisAngle(up, angle.current)
     rigid.setRotation(quaternion, true)
-    rigid.setLinvel({ x: velocity.x, y: 0, z: velocity.z }, true)    
+    rigid.setLinvel({ x: velocity.x, y: 0, z: velocity.z }, true)   
+    
     const anyKeyPressed = forwardPressed || backwardPressed || leftPressed || rightPressed
     if (mixer.current && fbx.animations.length > 0) {
       const action = mixer.current.clipAction(fbx.animations[0])
@@ -65,9 +66,10 @@ const Player = ({ RigidRef, playerRef }: { RigidRef: React.RefObject<RapierRigid
   })
 
   return (
-    <RigidBody ref={RigidRef} colliders={false} mass={1}>
-      <CuboidCollider args={[0.10, 0.01, 0.10]} />
-      <primitive ref={playerRef} object={fbx} position={[0, 0, 0]} scale={0.001} />
+    <RigidBody ref={RigidRef} colliders={false} mass={0} linearDamping={100} angularDamping={100}>
+      <CuboidCollider args={[0.15, 0.02, 0.15]} >
+        <primitive ref={playerRef} object={fbx} position={[0, 0, 0]} scale={0.001} />
+      </CuboidCollider>
       <arrowHelper />
     </RigidBody>
   )
@@ -84,15 +86,52 @@ const ThirdPersonCamera = ({
   mazeRef: React.RefObject<THREE.Group>
 }) => {
 
-  useFrame((state) => {
-    const player = rigidBody.current
-    const maze = mazeRef.current
-    if (!player || !maze) return
-    const offset = new Vector3(0, 0.60, -1).applyQuaternion(player.rotation());
-    const cameraPosition =  new Vector3().copy(player.translation()).add(offset);
-    state.camera.position.copy(cameraPosition);
-    state.camera.lookAt(new Vector3().copy(player.translation()));
-  })
+  const smoothedPlayerPos = useRef(new THREE.Vector3())
+
+useFrame((state) => {
+  const player = rigidBody.current;
+  const maze = mazeRef.current;
+  if (!player || !maze) return;
+
+  const rawPlayerPos = new THREE.Vector3().copy(player.translation());
+  smoothedPlayerPos.current.lerp(rawPlayerPos, 0.2); // Add damping
+
+  const playerQuat = new THREE.Quaternion().copy(player.rotation());
+  const cameraOffset = new THREE.Vector3(0, 0.6, -1).applyQuaternion(playerQuat);
+  const desiredCameraPos = new THREE.Vector3().copy(smoothedPlayerPos.current).add(cameraOffset);
+
+  const direction = desiredCameraPos.clone().sub(smoothedPlayerPos.current).normalize();
+  const raycaster = new THREE.Raycaster(smoothedPlayerPos.current, direction, 0, cameraOffset.length());
+
+  const intersects = raycaster.intersectObjects(maze.children, true);
+
+  const finalCameraPos = new THREE.Vector3();
+  if (intersects.length > 0) {
+    const hitPoint = intersects[0].point;
+    const buffer = 0.2;
+    finalCameraPos.copy(hitPoint).addScaledVector(direction, -buffer);
+  } else {
+    finalCameraPos.copy(desiredCameraPos);
+  }
+
+  // Lerp to final position
+  state.camera.position.lerp(finalCameraPos, 0.15);
+
+  // Smooth look at the smoothed position
+  state.camera.lookAt(smoothedPlayerPos.current);
+});
+
+
+  // useFrame((state) => {
+  //   const player = rigidBody.current
+  //   const maze = mazeRef.current
+  //   if (!player || !maze) return
+  //   const offset = new Vector3(0, 0.60, -1).applyQuaternion(player.rotation());
+  //   const cameraPosition =  new Vector3().copy(player.translation()).add(offset);
+  //   state.camera.position.copy(cameraPosition);
+  //   state.camera.lookAt(new Vector3().copy(player.translation()));
+  
+  // })
 
   return null
 }
