@@ -147,7 +147,11 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
           )
         })
       )}
-      <CuboidCollider args={[16,2,16]} position={[0, -2, 0]} />
+      <CuboidCollider
+      friction={2}
+  args={[maze[0].length / 2, 1, maze.length / 2]}
+  position={[maze[0].length / 2 - 0.5, -1, maze.length / 2 - 0.5]}
+/>
 
     </group>
   );
