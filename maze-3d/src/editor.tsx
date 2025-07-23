@@ -6,6 +6,7 @@ import { ControlsEnum } from './store/constants'
 import { Player, ThirdPersonCamera } from './player/player'
 import * as THREE from 'three'
 import { Physics, RapierRigidBody } from '@react-three/rapier'
+import MobileControls from './components/mobile-controls'
 
 const Editor = () => {
   const map = React.useMemo<KeyboardControlsEntry<ControlsEnum>[]>(()=>[
@@ -23,7 +24,7 @@ const Editor = () => {
       <KeyboardControls
         map={map}>
         <Canvas >
-          <Physics debug >
+          <Physics>
           <Sky sunPosition={[100, 20, 100]} />
           <ambientLight intensity={1} />
           <directionalLight position={[5, 10, 5]} />
@@ -33,6 +34,7 @@ const Editor = () => {
           <OrbitControls />
           </Physics>
         </Canvas>
+        <MobileControls/>
       </KeyboardControls>
     </div>
   )

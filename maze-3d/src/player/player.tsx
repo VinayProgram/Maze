@@ -5,9 +5,11 @@ import { useEffect, useRef } from 'react'
 import { useKeyboardControls } from '@react-three/drei'
 import type { ControlsEnum } from '../store/constants'
 import { CuboidCollider, RigidBody, type RapierRigidBody } from '@react-three/rapier'
+import { useStore } from '../store/common.store'
 // import { Vector3 } from 'three'
 
 const Player = ({ RigidRef, playerRef }: { RigidRef: React.RefObject<RapierRigidBody>, playerRef: React.RefObject<THREE.Group> }) => {
+  const controlsZustand = useStore(s=>s.controls)
   const fbx = useLoader(FBXLoader, '/Walking.fbx')
   const mixer = useRef<THREE.AnimationMixer>(null)
   const forwardPressed = useKeyboardControls<ControlsEnum>(s => s.ArrowUp)
@@ -40,20 +42,20 @@ const Player = ({ RigidRef, playerRef }: { RigidRef: React.RefObject<RapierRigid
     direction.current.y = 0 
     direction.current.normalize()
 
-    if (forwardPressed) {
+    if (forwardPressed || controlsZustand.forward) {
       velocity.add(direction.current.clone().multiplyScalar(speed))
     }
-    if (backwardPressed) {
+    if (backwardPressed || controlsZustand.backward) {
       velocity.add(direction.current.clone().multiplyScalar(-speed))
     }
-    if (leftPressed) angle.current += 0.05
-    if (rightPressed) angle.current -= 0.05
+    if (leftPressed || controlsZustand.left) angle.current += 0.05
+    if (rightPressed || controlsZustand.right) angle.current -= 0.05
   
     quaternion.setFromAxisAngle(up, angle.current)
     rigid.setRotation(quaternion, true)
     rigid.setLinvel({ x: velocity.x, y: 0, z: velocity.z }, true)   
     
-    const anyKeyPressed = forwardPressed || backwardPressed || leftPressed || rightPressed
+    const anyKeyPressed = forwardPressed || backwardPressed || leftPressed || rightPressed || controlsZustand.forward || controlsZustand.backward || controlsZustand.left || controlsZustand.right
     if (mixer.current && fbx.animations.length > 0) {
       const action = mixer.current.clipAction(fbx.animations[0])
       if (anyKeyPressed) {
