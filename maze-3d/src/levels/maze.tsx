@@ -73,7 +73,7 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
           // 3. Render based on the 'type' property
           if (cell.type === 'wall') {
             return (      
-              <RigidBody type="fixed" > 
+              <RigidBody type="fixed" key={`${rowIndex}-${colIndex}-wall`}> 
               <Box
                 onClick={() => {
                   console.log(cell.id)
@@ -139,6 +139,7 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
           // It's just a regular path, so render nothing
           return (
               <Box
+                key={`${rowIndex}-${colIndex}-path`}
                 position={[colIndex, 0.01, rowIndex]}
                 args={[1, 0.02, 1]}
               >
