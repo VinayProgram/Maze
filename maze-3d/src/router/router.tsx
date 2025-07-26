@@ -1,11 +1,12 @@
 import { createRootRoute, createRoute, createRouter } from "@tanstack/react-router";
 import  Editor from "../editor";
+import Homepage from "../homepage";
 
 const rootRoute = createRootRoute()
 const indexRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/',
-    component: () => <div>Hello</div>,
+    component: () => <Homepage/>,
 })
 
 const GameRoute = createRoute({
