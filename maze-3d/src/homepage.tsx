@@ -4,7 +4,6 @@ import MazeHomepage from "./components/maze-homepage"
 import React from "react"
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
-import { OrbitControls } from "@react-three/drei"
 import GameOptionsPage from "./components/secondHomePage"
 import AboutMePage from "./components/developer-page"
 

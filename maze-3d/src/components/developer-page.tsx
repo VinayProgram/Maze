@@ -1,5 +1,3 @@
-import React from "react"
-
 const AboutMePage = () => {
   return (
     <div className="h-full w-full bg-gradient-to-br from-gray-900 via-purple-900 to-black flex items-center justify-center">

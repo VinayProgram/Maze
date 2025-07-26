@@ -1,6 +1,5 @@
 import React from 'react'
 import { Maze } from '../levels/maze'
-import { Canvas, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
