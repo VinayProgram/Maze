@@ -1,8 +1,8 @@
 import React from 'react'
-import { Maze } from '../levels/maze'
 import * as THREE from 'three'
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
+import { Maze } from '@/app/levels/maze'
 const MazeHomepage = () => {
     const mazeRef = React.useRef<THREE.Group>(null!)
    

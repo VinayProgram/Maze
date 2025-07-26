@@ -1,12 +1,12 @@
 import { Canvas } from '@react-three/fiber'
 import { KeyboardControls, OrbitControls, Sky, type KeyboardControlsEntry } from '@react-three/drei'
 import React, { useRef } from 'react'
-import {Maze} from './levels/maze'
-import { ControlsEnum } from './store/constants'
-import { Player, ThirdPersonCamera } from './player/player'
 import * as THREE from 'three'
 import { Physics, RapierRigidBody } from '@react-three/rapier'
-import MobileControls from './components/mobile-controls'
+import { ControlsEnum } from '@/store/constants'
+import { Player, ThirdPersonCamera } from '../player/player'
+import { Maze } from '../levels/maze'
+import MobileControls from './mobile-controls'
 
 const Editor = () => {
   const map = React.useMemo<KeyboardControlsEntry<ControlsEnum>[]>(()=>[

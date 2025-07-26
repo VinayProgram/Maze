@@ -1,11 +1,11 @@
 import { Canvas } from "@react-three/fiber"
 import { Physics } from "@react-three/rapier"
-import MazeHomepage from "./components/maze-homepage"
 import React from "react"
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
-import GameOptionsPage from "./components/secondHomePage"
+import MazeHomepage from "./components/maze-homepage"
 import AboutMePage from "./components/developer-page"
+import GameOptionsPage from "./components/secondHomePage"
 
 const Homepage = () => {
   const [scrollY, setScrollY] = React.useState(0)

@@ -1,7 +1,6 @@
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { router } from "../router/router"
 import { useRouter } from "@tanstack/react-router"
 
 gsap.registerPlugin(ScrollTrigger)

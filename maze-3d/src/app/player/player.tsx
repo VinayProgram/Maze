@@ -3,9 +3,9 @@ import { FBXLoader } from 'three-stdlib'
 import * as THREE from 'three'
 import { useEffect, useRef } from 'react'
 import { useKeyboardControls } from '@react-three/drei'
-import type { ControlsEnum } from '../store/constants'
 import { CuboidCollider, RigidBody, type RapierRigidBody } from '@react-three/rapier'
-import { useStore } from '../store/common.store'
+import { useStore } from '@/store/common.store'
+import type { ControlsEnum } from '@/store/constants'
 // import { Vector3 } from 'three'
 
 const Player = ({ RigidRef, playerRef }: { RigidRef: React.RefObject<RapierRigidBody>, playerRef: React.RefObject<THREE.Group> }) => {

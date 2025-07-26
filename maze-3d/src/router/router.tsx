@@ -1,7 +1,8 @@
 import { createRootRoute, createRoute, createRouter } from "@tanstack/react-router";
-import  Editor from "../editor";
-import Homepage from "../homepage";
-import LevelDesign from "../levels/level-design";
+import Homepage from "@/app/homepage/homepage";
+import LevelDesign from "@/app/levels/level-design";
+import Editor from "@/app/editor/editor";
+
 
 const rootRoute = createRootRoute()
 const indexRoute = createRoute({

@@ -1,5 +1,5 @@
-import { useStore } from '../store/common.store'
-import { ControlsEnum } from '../store/constants'
+import { useStore } from '@/store/common.store'
+import { ControlsEnum } from '@/store/constants'
 
 const MobileControls = () => {
   const setControl = useStore((state) => state.setControl)
