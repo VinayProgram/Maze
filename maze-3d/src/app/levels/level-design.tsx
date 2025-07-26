@@ -52,7 +52,7 @@ const StepForm = ({
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-fuchsia-100 px-4">
+    <div className="min-h-screen w-full flex items-center justify-center bg-fuchsia-100 px-4">
       <div className="bg-white filter backdrop-blur-sm shadow-md rounded-xl p-8 w-full max-w-md">
         <h1 className="text-2xl font-bold text-center mb-6">Maze Setup</h1>
         
