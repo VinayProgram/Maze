@@ -1,10 +1,13 @@
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { router } from "../router/router"
+import { useRouter } from "@tanstack/react-router"
 
 gsap.registerPlugin(ScrollTrigger)
 
 const GameOptionsPage = () => {
+  const navigate = useRouter()
   useGSAP(() => {
     // Title animation
     gsap.fromTo('.play-title', 
@@ -93,7 +96,7 @@ const GameOptionsPage = () => {
   }
 
   const handleDesignLevel = () => {
-    console.log("Navigate to Design Level")
+    navigate.navigate({ to: '/level-design' })
     // Add your navigation logic here
   }
 
