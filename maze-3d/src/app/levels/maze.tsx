@@ -1,6 +1,5 @@
 import { Box } from '@react-three/drei'
 import { CuboidCollider, RigidBody } from '@react-three/rapier';
-import { useEffect, useRef } from 'react';
 import * as THREE from 'three'
 
 export const mazeData: MazeCell[][] = [
