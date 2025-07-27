@@ -2,12 +2,17 @@ import { AppSidebar } from "@/components/app-sidebar"
 import type { Step } from "../level-design"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import React from "react"
-import { type MazeCell } from "../maze"
+import { Maze, type MazeCell } from "../maze"
 import { useMazeCellStore } from "@/store/mazeStore"
 import { useRouter } from "@tanstack/react-router"
+import * as THREE from 'three'
+import { Canvas } from "@react-three/fiber"
+import { Physics } from "@react-three/rapier"
+import { OrbitControls } from "@react-three/drei"
 
 const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
   const mazeSize = currentStep[1].mazeSize
+  const mazeRef = React.useRef<THREE.Group>(null!)
   const mazeSelectecdType = useMazeCellStore((state) => state.selectedCell)
   const navigation = useRouter()
   const setLevel = useMazeCellStore((state) => state.setLevel)
@@ -76,6 +81,9 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
                 {row.map((cell, colIndex) => {
                   return (
                     <div
+                    onMouseEnter={() => {
+                      updateMaze(rowIndex,colIndex)
+                    }}
                     onClick={() => {
                       updateMaze(rowIndex,colIndex)
                     }}
@@ -107,6 +115,16 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
 
           }}>Play</button>
         </main>
+        <div className="w-full h-screen">
+        <Canvas>
+          <Physics>
+            <ambientLight intensity={0.5} />
+            <directionalLight position={[1, 1, 1]} intensity={0.5} />
+            <OrbitControls />
+          <Maze mazeRef={mazeRef} />
+          </Physics>
+        </Canvas>
+        </div>
       </SidebarProvider>
     </div>
   )
