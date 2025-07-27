@@ -63,7 +63,7 @@ export const useMazeCellStore = create<MazeCellStore>((set) => ({
       },
     })),
   level:mazeData,
-  setLevel:(level:MazeCell[][])=>set((state)=>({
+  setLevel:(level:MazeCell[][])=>set(()=>({
     level:level
   }))
 }))
