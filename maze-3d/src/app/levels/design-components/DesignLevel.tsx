@@ -3,9 +3,14 @@ import type { Step } from "../level-design"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import React from "react"
 import { type MazeCell } from "../maze"
+import { useMazeCellStore } from "@/store/mazeStore"
+import { useRouter } from "@tanstack/react-router"
 
 const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
   const mazeSize = currentStep[1].mazeSize
+  const mazeSelectecdType = useMazeCellStore((state) => state.selectedCell)
+  const navigation = useRouter()
+  const setLevel = useMazeCellStore((state) => state.setLevel)
   const mazeData = mazeSize.split("x").map((size) => parseInt(size))
   const columns = mazeData[0]
   const rows = mazeData[1]
@@ -25,8 +30,39 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
 
   const updateMaze = (rowIndex: number, colIndex: number) => {
     const newMaze = [...mazeState]
-    newMaze[rowIndex][colIndex].type = "wall"
+    newMaze[rowIndex][colIndex]={
+      id: `${rowIndex}-${colIndex}`,
+      type: mazeSelectecdType.type,
+      isStart: mazeSelectecdType.isStart,
+      isEnd: mazeSelectecdType.isEnd,
+      isHazard: mazeSelectecdType.isHazard,
+      isPortal: mazeSelectecdType.isPortal,
+    }
     setMazeState(newMaze)
+    console.log(mazeState)
+  }
+
+  const selectColor = (cell: MazeCell) => {
+    switch (cell.type) {
+      case "wall":
+        return "bg-amber-400"
+      case "path":
+        if(cell.isStart){
+          return "bg-green-400"
+        }
+        if(cell.isEnd){
+          return "bg-red-400"
+        }
+        if(cell.isHazard){
+          return "bg-red-400"
+        }
+        if(cell.isPortal){
+          return "bg-blue-400"
+        }
+        return "bg-white"
+      default:
+        return "bg-white"
+    }
   }
   return (
     <div>
@@ -40,11 +76,19 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
                 {row.map((cell, colIndex) => {
                   return (
                     <div
-                    onMouseEnter={() => {
+                    onClick={() => {
                       updateMaze(rowIndex,colIndex)
                     }}
                     key={colIndex}
-                    className={`w-12 h-12 border border-gray-500 flex items-center justify-center text-sm font-semibold bg-${cell.type=="wall"?"amber-300":"white"} hover:bg-gray-100 transition`}
+                    className={`
+                      w-12 
+                      h-12 border 
+                      border-gray-500 
+                      flex items-center 
+                      justify-center 
+                      text-sm font-semibold 
+                      ${selectColor(cell)}
+                     hover:bg-gray-100 transition`}
                   >
                     {cell.type}
                   </div>
@@ -54,6 +98,14 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
             )
           }
           )}
+          <button onClick={() => {
+            setLevel(mazeState)
+
+          }}>Save</button>
+            <button onClick={() => {
+            navigation.navigate({to:'/game'})
+
+          }}>Play</button>
         </main>
       </SidebarProvider>
     </div>

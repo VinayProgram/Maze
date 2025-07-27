@@ -5,10 +5,10 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import path from 'path'
 export default defineConfig({
   plugins: [
-    tanstackRouter({
-    target: 'react',
-    autoCodeSplitting: true,
-  }),
+  //   tanstackRouter({
+  //   target: 'react',
+  //   autoCodeSplitting: true,
+  // }),
   react(),
   tailwindcss()],
   resolve: {
