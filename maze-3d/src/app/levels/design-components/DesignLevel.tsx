@@ -9,6 +9,9 @@ import * as THREE from 'three'
 import { Canvas } from "@react-three/fiber"
 import { Physics } from "@react-three/rapier"
 import { OrbitControls } from "@react-three/drei"
+import { BrickWall, FlagIcon, ListStartIcon, MessageCircleQuestion, Play, RotateCcw, Save, Skull, SquareIcon } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Separator } from "@radix-ui/react-separator"
 
 const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
   const mazeSize = currentStep[1].mazeSize
@@ -16,6 +19,7 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
   const mazeSelectecdType = useMazeCellStore((state) => state.selectedCell)
   const navigation = useRouter()
   const setLevel = useMazeCellStore((state) => state.setLevel)
+  const level = useMazeCellStore((state) => state.level)
   const mazeData = mazeSize.split("x").map((size) => parseInt(size))
   const columns = mazeData[0]
   const rows = mazeData[1]
@@ -31,8 +35,11 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
       } as MazeCell
     })
   )
-  const [mazeState, setMazeState] = React.useState<MazeCell[][]>(maze)
-
+  const [isDrawing, setIsDrawing] = React.useState(false)
+  const [mazeState, setMazeState] = React.useState<MazeCell[][]>(level?level:maze)
+  React.useEffect(() => {
+    resetMaze()
+  }, [])
   const updateMaze = (rowIndex: number, colIndex: number) => {
     const newMaze = [...mazeState]
     newMaze[rowIndex][colIndex]={
@@ -47,81 +54,106 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
     console.log(mazeState)
   }
 
-  const selectColor = (cell: MazeCell) => {
-    switch (cell.type) {
-      case "wall":
-        return "bg-amber-400"
-      case "path":
-        if(cell.isStart){
-          return "bg-green-400"
-        }
-        if(cell.isEnd){
-          return "bg-red-400"
-        }
-        if(cell.isHazard){
-          return "bg-red-400"
-        }
-        if(cell.isPortal){
-          return "bg-blue-400"
-        }
-        return "bg-white"
-      default:
-        return "bg-white"
+  const getCellStyles = (cell: MazeCell) => {
+    let baseStyle = "aspect-square flex items-center justify-center rounded-md transition-all duration-150 ease-in-out cursor-pointer transform hover:scale-105"
+    let colorStyle = "bg-slate-800/50 border-slate-700 hover:bg-slate-700/80" // Default path
+
+    if (cell.type === "wall") {
+      colorStyle = "bg-slate-900 border-slate-600 shadow-inner"
+    } else if (cell.isStart) {
+      colorStyle = "bg-emerald-500/20 border-emerald-500"
+    } else if (cell.isEnd) {
+      colorStyle = "bg-rose-500/20 border-rose-500"
+    } else if (cell.isHazard) {
+      colorStyle = "bg-yellow-500/20 border-yellow-500"
+    } else if (cell.isPortal) {
+      colorStyle = "bg-violet-500/20 border-violet-500"
     }
+    
+    return `${baseStyle}`
   }
-  return (
-    <div>
+
+   // Render icons inside cells for better clarity
+   const renderCellIcon = (cell: MazeCell) => {
+    const iconProps = { size: 24, className: "opacity-80" }
+    if (cell.isStart) return <ListStartIcon {...iconProps} className="text-emerald-400" />
+    if (cell.isEnd) return <FlagIcon {...iconProps} className="text-rose-400" />
+    if (cell.isHazard) return <Skull {...iconProps} className="text-yellow-400" />
+    if (cell.isPortal) return <MessageCircleQuestion {...iconProps} className="text-violet-400" />
+    if (cell.type === 'wall') return <BrickWall {...iconProps} className="text-amber-800"/>
+    if(cell.type === 'path') return <SquareIcon {...iconProps} className="text-slate-400"/>
+  }
+
+
+  const resetMaze = () => {
+    setMazeState(maze)
+    setLevel(maze)
+  }
+    return (
+      <div className="flex h-screen w-full bg-slate-950 text-slate-50">
       <SidebarProvider>
         <AppSidebar />
-        <SidebarTrigger/>
-        <main>
-          {mazeState.map((row, rowIndex) => {
-            return (
-              <section className="flex" key={rowIndex}>
-                {row.map((cell, colIndex) => {
-                  return (
+         {/* ======== Left Panel: Editor ======== */}
+         <main className="flex-1 flex flex-col p-4 md:p-6 lg:p-8 space-y-6 overflow-y-auto">
+          <header className="flex items-center gap-4">
+            <SidebarTrigger className="flex items-center justify-center p-2 rounded-md hover:bg-slate-800 transition-colors"/>
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+                Maze Forge
+              </h1>
+              <p className="text-slate-400 text-sm md:text-base mt-1">
+                Design your level. Current selection: <span className="font-semibold text-cyan-400">{mazeSelectecdType.type}</span>
+              </p>
+            </div>
+          </header>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <Button onClick={() => setLevel(mazeState)}>
+              <Save className="mr-2 h-4 w-4" /> Save
+            </Button>
+            <Button variant="secondary" onClick={() => navigation.navigate({ to: '/game' })}>
+              <Play className="mr-2 h-4 w-4" /> Play
+            </Button>
+            <Button variant="destructive" onClick={resetMaze}>
+              <RotateCcw className="mr-2 h-4 w-4" /> Reset
+            </Button>
+          </div>
+          
+          <Separator className="bg-slate-800" />
+
+          {/* ======== Maze Grid ======== */}
+          <div className="flex-grow flex items-center justify-center">
+            <div
+              className="grid gap-1 bg-black/20 p-2 md:p-4 rounded-lg shadow-inner select-none"
+              style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
+              onMouseDown={() => setIsDrawing(true)}
+              onMouseUp={() => setIsDrawing(false)}
+              onMouseLeave={() => setIsDrawing(false)} // Stop drawing if mouse leaves the grid
+            >
+              {mazeState.map((row, rowIndex) => (
+                <React.Fragment key={rowIndex}>
+                  {row.map((cell, colIndex) => (
                     <div
-                    onMouseEnter={() => {
-                      updateMaze(rowIndex,colIndex)
-                    }}
-                    onClick={() => {
-                      updateMaze(rowIndex,colIndex)
-                    }}
-                    key={colIndex}
-                    className={`
-                      w-12 
-                      h-12 border 
-                      border-gray-500 
-                      flex items-center 
-                      justify-center 
-                      text-sm font-semibold 
-                      ${selectColor(cell)}
-                     hover:bg-gray-100 transition`}
-                  >
-                    {cell.type}
-                  </div>
-                  );
-                })}
-              </section>
-            )
-          }
-          )}
-          <button onClick={() => {
-            setLevel(mazeState)
-
-          }}>Save</button>
-            <button onClick={() => {
-            navigation.navigate({to:'/game'})
-
-          }}>Play</button>
+                      key={cell.id}
+                      className={getCellStyles(cell)}
+                      onMouseDown={() => updateMaze(rowIndex, colIndex)}
+                      onMouseEnter={() => isDrawing && updateMaze(rowIndex, colIndex)}
+                    >
+                      {renderCellIcon(cell)}
+                    </div>
+                  ))}
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
         </main>
-        <div className="w-full h-screen">
+        <div className="hidden lg:block lg:w-1/2 xl:w-1/3 border-l border-slate-800 h-full">
         <Canvas>
           <Physics>
             <ambientLight intensity={0.5} />
             <directionalLight position={[1, 1, 1]} intensity={0.5} />
             <OrbitControls />
-          <Maze mazeRef={mazeRef} />
+            <Maze mazeRef={mazeRef} />
           </Physics>
         </Canvas>
         </div>

@@ -1,30 +1,61 @@
 import React, { useState } from "react"
 import DesignLevel from "./design-components/DesignLevel"
 
+// Shadcn UI Components for the form
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { AlertCircle, ArrowRight } from "lucide-react"
+
+// Interface remains the same
 export interface Step {
   activeStep: number
   1: {
     mazeName: string
     mazeSize: string
+    customMazeSizeX?: string
+    customMazeSizeY?: string
   }
 }
 
+// Main component to switch between steps
 const LevelDesign = () => {
   const [currentStep, setStep] = useState<Step>({
     activeStep: 1,
-    1: { mazeName: "", mazeSize: "" },
+    1: { mazeName: "", mazeSize: "", customMazeSizeX: "", customMazeSizeY: "" },
   })
 
   switch (currentStep.activeStep) {
     case 1:
       return <StepForm currentStep={currentStep} setStep={setStep} />
     case 2:
+      // This will render the beautifully designed DesignLevel component from before
       return <DesignLevel currentStep={currentStep} />
     default:
-      return <div className="text-center text-red-500">Invalid step</div>
+      return (
+        <div className="flex min-h-screen w-full items-center justify-center bg-slate-950 text-center text-red-500">
+          Invalid step
+        </div>
+      )
   }
 }
 
+// The completely redesigned StepForm component
 const StepForm = ({
   currentStep,
   setStep,
@@ -32,68 +63,149 @@ const StepForm = ({
   currentStep: Step
   setStep: React.Dispatch<React.SetStateAction<Step>>
 }) => {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const [error, setError] = useState<string | null>(null)
+
+  // Handler for standard text inputs
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
+
     setStep((prev) => ({
       ...prev,
       1: {
         ...prev[1],
         [name]: value,
+        // If user starts typing in custom fields, clear the predefined selection
+        ...(name.startsWith("custom") ? { mazeSize: "" } : {}),
+      },
+    }))
+  }
+
+  // Dedicated handler for the shadcn/ui Select component
+  const handleSelectChange = (value: string) => {
+    setStep((prev) => ({
+      ...prev,
+      1: {
+        ...prev[1],
+        mazeSize: value,
+        // If user selects a predefined size, clear the custom fields
+        customMazeSizeX: "",
+        customMazeSizeY: "",
       },
     }))
   }
 
   const handleNext = () => {
-    if (currentStep[1].mazeName && currentStep[1].mazeSize) {
-      setStep((prev) => ({ ...prev, activeStep: 2 }))
+    const { mazeName, mazeSize, customMazeSizeX, customMazeSizeY } = currentStep[1]
+
+    const finalMazeSize =
+      mazeSize || (customMazeSizeX && customMazeSizeY ? `${customMazeSizeX}x${customMazeSizeY}` : "")
+
+    if (mazeName.trim() && finalMazeSize) {
+      setError(null) // Clear any previous errors
+      setStep((prev) => ({
+        ...prev,
+        1: { ...prev[1], mazeSize: finalMazeSize },
+        activeStep: 2,
+      }))
     } else {
-      alert("Please fill in all fields.")
+      // Set an inline error message instead of using alert()
+      setError("Please provide a maze name and a valid size.")
     }
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-fuchsia-100 px-4">
-      <div className="bg-white filter backdrop-blur-sm shadow-md rounded-xl p-8 w-full max-w-md">
-        <h1 className="text-2xl font-bold text-center mb-6">Maze Setup</h1>
-        
-        <div className="mb-4">
-          <label className="block text-gray-700 font-medium mb-1">Maze Name</label>
-          <input
-            type="text"
-            name="mazeName"
-            value={currentStep[1].mazeName}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter maze name"
-          />
-        </div>
+    <div className="flex min-h-screen w-full items-center justify-center bg-slate-950 p-4">
+      <Card className="w-full max-w-md animate-in fade-in-90 slide-in-from-bottom-10 duration-500 bg-slate-900 border-slate-800 text-slate-50">
+        <CardHeader className="text-center">
+          <CardTitle className="text-3xl font-bold tracking-tight">Maze Setup</CardTitle>
+          <CardDescription className="text-slate-400 pt-1">
+            Configure the name and dimensions to begin.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-6">
+          {/* Maze Name */}
+          <div className="grid gap-2">
+            <Label htmlFor="mazeName">Maze Name</Label>
+            <Input
+              id="mazeName"
+              name="mazeName"
+              value={currentStep[1].mazeName}
+              onChange={handleChange}
+              placeholder="e.g., The Dragon's Lair"
+              className="bg-slate-950 border-slate-700 focus:ring-slate-500"
+            />
+          </div>
 
-        <div className="mb-6">
-          <label className="block text-gray-700 font-medium mb-1">Maze Size</label>
-          <select
-            name="mazeSize"
-            value={currentStep[1].mazeSize}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select size</option>
-            <option value="10x10">10 x 10</option>
-            <option value="20x20">20 x 20</option>
-            <option value="30x30">30 x 30</option>
-          </select>
-        </div>
+          {/* Predefined Maze Size */}
+          <div className="grid gap-2">
+            <Label htmlFor="mazeSize">Predefined Size</Label>
+            <Select
+              name="mazeSize"
+              value={currentStep[1].mazeSize}
+              onValueChange={handleSelectChange}
+            >
+              <SelectTrigger className="w-full bg-slate-950 border-slate-700 focus:ring-slate-500">
+                <SelectValue placeholder="Select a size" />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-900 border-slate-700 text-slate-50">
+                <SelectItem value="10x10">Small (10 x 10)</SelectItem>
+                <SelectItem value="20x20">Medium (20 x 20)</SelectItem>
+                <SelectItem value="30x30">Large (30 x 30)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-        <button
-          onClick={handleNext}
-          className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
-        >
-          Next
-        </button>
-      </div>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-slate-700" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-slate-900 px-2 text-slate-400">Or</span>
+            </div>
+          </div>
+
+          {/* Custom Size */}
+          <div className="grid gap-2">
+            <Label>Custom Size</Label>
+            <div className="flex gap-4">
+              <Input
+                type="number"
+                name="customMazeSizeX"
+                min="5"
+                max="50"
+                value={currentStep[1].customMazeSizeX}
+                onChange={handleChange}
+                placeholder="Width"
+                className="bg-slate-950 border-slate-700 focus:ring-slate-500"
+              />
+              <Input
+                type="number"
+                name="customMazeSizeY"
+                min="5"
+                max="50"
+                value={currentStep[1].customMazeSizeY}
+                onChange={handleChange}
+                placeholder="Height"
+                className="bg-slate-950 border-slate-700 focus:ring-slate-500"
+              />
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter className="flex flex-col gap-4">
+          {error && (
+            <div className="flex w-full items-center gap-2 rounded-md bg-red-900/50 p-3 text-sm text-red-300 animate-in fade-in-50">
+              <AlertCircle className="h-4 w-4 flex-shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+          <Button onClick={handleNext} className="w-full group">
+            Build Maze
+            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   )
 }
-
-
 
 export default LevelDesign
