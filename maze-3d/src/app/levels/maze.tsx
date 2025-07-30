@@ -1,7 +1,10 @@
 import { useMazeCellStore } from '@/store/mazeStore';
 import { Box } from '@react-three/drei'
+import { useLoader } from '@react-three/fiber';
 import { CuboidCollider, RigidBody } from '@react-three/rapier';
+import React from 'react';
 import * as THREE from 'three'
+import { GLTFLoader } from 'three-stdlib';
 
 export interface MazeCell {
   type: 'wall' | 'path';
@@ -10,12 +13,23 @@ export interface MazeCell {
   isHazard?: boolean;
   isPortal?: boolean;
   id: string;
+  props?:{
+    url:string
+  }
 }
 
 
 export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => {
   const maze = useMazeCellStore((state) => state.level)
-
+  const [diffuse, normal,rough] = useLoader(THREE.TextureLoader, [
+    '/textures/rock_wall_13_diff_1k.jpg',
+    '/textures/rock_wall_13_nor_gl_1k.jpg',
+    '/textures/rock_wall_13_rough_1k.jpg',
+  ]);
+  [diffuse, normal].forEach((tex) => {
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(2, 2);
+  });
   return (
     <group ref={mazeRef}>
       {maze.map((row, rowIndex) =>
@@ -31,7 +45,7 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
                   position={[colIndex, 0.5, rowIndex]} // Standard 1x1x1 cube
                   args={[1, 1, 1]}
                 >
-                  <meshStandardMaterial color="#555555" />
+                  <meshPhysicalMaterial map={diffuse} normalMap={normal} roughnessMap={rough} />
                 </Box>
               </RigidBody>
             );
@@ -86,7 +100,11 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
             );
           }
 
-          // It's just a regular path, so render nothing
+          if(cell.props){
+           return(
+            <PropLoader url={cell.props.url} position={[colIndex, 0.01, rowIndex]}  key={`${rowIndex}-${colIndex}-prop`} />
+           ) 
+          }
           return (
             <Box
               key={`${rowIndex}-${colIndex}-path`}
@@ -107,5 +125,20 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
     </group>
   );
 };
+
+
+const PropLoader=({url,position}:{
+  url:string,
+  position:[number,number,number],
+})=>{
+  const modelLoader = useLoader(GLTFLoader,url)
+  const clone = React.useMemo(() => modelLoader.scene.clone(true), [modelLoader]);
+
+  return(
+    <mesh scale={0.1} position={position}>
+    <primitive object={clone}  />
+    </mesh>
+  )
+}
 
 

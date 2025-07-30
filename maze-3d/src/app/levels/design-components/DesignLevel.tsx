@@ -9,7 +9,7 @@ import * as THREE from 'three'
 import { Canvas } from "@react-three/fiber"
 import { Physics } from "@react-three/rapier"
 import { OrbitControls } from "@react-three/drei"
-import { BrickWall, FlagIcon, ListStartIcon, MessageCircleQuestion, Play, RotateCcw, Save, Skull, SquareIcon } from "lucide-react"
+import { BrickWall, FlagIcon, ListStartIcon, MessageCircleQuestion, Play, RotateCcw, Save, Skull, SquareIcon, TreesIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@radix-ui/react-separator"
 
@@ -20,9 +20,8 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
   const navigation = useRouter()
   const setLevel = useMazeCellStore((state) => state.setLevel)
   const level = useMazeCellStore((state) => state.level)
-  const mazeData = mazeSize.split("x").map((size) => parseInt(size))
-  const columns = mazeData[0]
-  const rows = mazeData[1]
+  const columns = mazeSize[0]
+  const rows = mazeSize[1]
   const maze = Array.from({ length: rows }, (_, rowIndex) =>
     Array.from({ length: columns }, (_, colIndex) => {
       return {
@@ -49,14 +48,14 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
       isEnd: mazeSelectecdType.isEnd,
       isHazard: mazeSelectecdType.isHazard,
       isPortal: mazeSelectecdType.isPortal,
+      props:mazeSelectecdType.props
     }
     setMazeState(newMaze)
-    console.log(mazeState)
   }
 
   const getCellStyles = (cell: MazeCell) => {
-    let baseStyle = "aspect-square flex items-center justify-center rounded-md transition-all duration-150 ease-in-out cursor-pointer transform hover:scale-105"
-    let colorStyle = "bg-slate-800/50 border-slate-700 hover:bg-slate-700/80" // Default path
+    const baseStyle = "aspect-square flex items-center justify-center rounded-md transition-all duration-150 ease-in-out cursor-pointer transform hover:scale-105"
+    let colorStyle = "" // Default path
 
     if (cell.type === "wall") {
       colorStyle = "bg-slate-900 border-slate-600 shadow-inner"
@@ -69,8 +68,11 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
     } else if (cell.isPortal) {
       colorStyle = "bg-violet-500/20 border-violet-500"
     }
+    else if (cell.props) {
+      colorStyle = "bg-green-500/20 border-green-500"
+    }
     
-    return `${baseStyle}`
+    return `${baseStyle} ${colorStyle}`
   }
 
    // Render icons inside cells for better clarity
@@ -79,9 +81,11 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
     if (cell.isStart) return <ListStartIcon {...iconProps} className="text-emerald-400" />
     if (cell.isEnd) return <FlagIcon {...iconProps} className="text-rose-400" />
     if (cell.isHazard) return <Skull {...iconProps} className="text-yellow-400" />
+    if(cell.props) return <TreesIcon {...iconProps} className="text-green-400"/>
     if (cell.isPortal) return <MessageCircleQuestion {...iconProps} className="text-violet-400" />
     if (cell.type === 'wall') return <BrickWall {...iconProps} className="text-amber-800"/>
     if(cell.type === 'path') return <SquareIcon {...iconProps} className="text-slate-400"/>
+   
   }
 
 
@@ -148,6 +152,7 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
           </div>
         </main>
         <div className="hidden lg:block lg:w-1/2 xl:w-1/3 border-l border-slate-800 h-full">
+         <React.Suspense fallback={<div>Loading...</div>}>
         <Canvas>
           <Physics>
             <ambientLight intensity={0.5} />
@@ -156,7 +161,8 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
             <Maze mazeRef={mazeRef} />
           </Physics>
         </Canvas>
-        </div>
+        </React.Suspense>
+      </div>
       </SidebarProvider>
     </div>
   )

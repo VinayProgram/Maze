@@ -27,9 +27,7 @@ export interface Step {
   activeStep: number
   1: {
     mazeName: string
-    mazeSize: string
-    customMazeSizeX?: string
-    customMazeSizeY?: string
+    mazeSize: [number, number]
   }
 }
 
@@ -37,7 +35,7 @@ export interface Step {
 const LevelDesign = () => {
   const [currentStep, setStep] = useState<Step>({
     activeStep: 1,
-    1: { mazeName: "", mazeSize: "", customMazeSizeX: "", customMazeSizeY: "" },
+    1: { mazeName: "", mazeSize: [10, 10] },
   })
 
   switch (currentStep.activeStep) {
@@ -74,8 +72,6 @@ const StepForm = ({
       1: {
         ...prev[1],
         [name]: value,
-        // If user starts typing in custom fields, clear the predefined selection
-        ...(name.startsWith("custom") ? { mazeSize: "" } : {}),
       },
     }))
   }
@@ -86,25 +82,19 @@ const StepForm = ({
       ...prev,
       1: {
         ...prev[1],
-        mazeSize: value,
-        // If user selects a predefined size, clear the custom fields
-        customMazeSizeX: "",
-        customMazeSizeY: "",
+        mazeSize: JSON.parse(value),
       },
     }))
   }
 
   const handleNext = () => {
-    const { mazeName, mazeSize, customMazeSizeX, customMazeSizeY } = currentStep[1]
+    const { mazeName, mazeSize } = currentStep[1]
 
-    const finalMazeSize =
-      mazeSize || (customMazeSizeX && customMazeSizeY ? `${customMazeSizeX}x${customMazeSizeY}` : "")
-
-    if (mazeName.trim() && finalMazeSize) {
+    if (mazeName.trim() && mazeSize) {
       setError(null) // Clear any previous errors
       setStep((prev) => ({
         ...prev,
-        1: { ...prev[1], mazeSize: finalMazeSize },
+        1: { ...prev[1], mazeSize  },
         activeStep: 2,
       }))
     } else {
@@ -141,16 +131,16 @@ const StepForm = ({
             <Label htmlFor="mazeSize">Predefined Size</Label>
             <Select
               name="mazeSize"
-              value={currentStep[1].mazeSize}
+              value={currentStep[1].mazeSize.join("x")}
               onValueChange={handleSelectChange}
             >
               <SelectTrigger className="w-full bg-slate-950 border-slate-700 focus:ring-slate-500">
                 <SelectValue placeholder="Select a size" />
               </SelectTrigger>
               <SelectContent className="bg-slate-900 border-slate-700 text-slate-50">
-                <SelectItem value="10x10">Small (10 x 10)</SelectItem>
-                <SelectItem value="20x20">Medium (20 x 20)</SelectItem>
-                <SelectItem value="30x30">Large (30 x 30)</SelectItem>
+                <SelectItem value={JSON.stringify([10, 10])}>Small (10 x 10)</SelectItem>
+                <SelectItem value={JSON.stringify([20, 20])}>Medium (20 x 20)</SelectItem>
+                <SelectItem value={JSON.stringify([30, 30])}>Large (30 x 30)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -173,7 +163,7 @@ const StepForm = ({
                 name="customMazeSizeX"
                 min="5"
                 max="50"
-                value={currentStep[1].customMazeSizeX}
+                value={currentStep[1].mazeSize[0]}
                 onChange={handleChange}
                 placeholder="Width"
                 className="bg-slate-950 border-slate-700 focus:ring-slate-500"
@@ -183,7 +173,7 @@ const StepForm = ({
                 name="customMazeSizeY"
                 min="5"
                 max="50"
-                value={currentStep[1].customMazeSizeY}
+                value={currentStep[1].mazeSize[1]}
                 onChange={handleChange}
                 placeholder="Height"
                 className="bg-slate-950 border-slate-700 focus:ring-slate-500"

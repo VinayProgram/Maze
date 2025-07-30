@@ -22,6 +22,7 @@ import { Label } from "./ui/label"
 import { useMazeCellStore } from "@/store/mazeStore"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Separator } from "./ui/separator"
+import { TreesIcon } from "lucide-react"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { selectedCell, setSelectedCell } = useMazeCellStore()
@@ -32,6 +33,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     if (selectedCell.isEnd) return "end"
     if (selectedCell.isHazard) return "hazard"
     if (selectedCell.isPortal) return "portal"
+    if(selectedCell.props) return "prop"
     return "normal" // Default path type
   }
 
@@ -43,6 +45,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       isEnd: value === "end",
       isHazard: value === "hazard",
       isPortal: value === "portal",
+      props:value === "prop" ? {url:'/stylized_tree.glb'} : undefined
     })
   }
   
@@ -53,6 +56,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     { value: "end", label: "End Point", icon: IconFlag },
     { value: "hazard", label: "Hazard", icon: IconSkull },
     { value: "portal", label: "Portal", icon: IconCircle },
+    { value: "prop", label: "Prop", icon: TreesIcon },
   ]
 
   return (
