@@ -21,6 +21,7 @@ export interface MazeCell {
 
 export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => {
   const maze = useMazeCellStore((state) => state.level)
+
   const [diffuse, normal,rough] = useLoader(THREE.TextureLoader, [
     '/textures/rock_wall_13_diff_1k.jpg',
     '/textures/rock_wall_13_nor_gl_1k.jpg',
@@ -28,7 +29,17 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
   ]);
   [diffuse, normal].forEach((tex) => {
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(2, 2);
+    tex.repeat.set(1, 1);
+  });
+
+  const [diffuse2, normal2,rough2] = useLoader(THREE.TextureLoader, [
+    '/textures/brick_crosswalk_diff_1k.jpg',
+    '/textures/brick_crosswalk_nor_gl_1k.jpg',
+    '/textures/brick_crosswalk_rough_1k.jpg',
+  ]);
+  [diffuse2, normal2].forEach((tex) => {
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(1, 1);
   });
   return (
     <group ref={mazeRef}>
@@ -45,7 +56,7 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
                   position={[colIndex, 0.5, rowIndex]} // Standard 1x1x1 cube
                   args={[1, 1, 1]}
                 >
-                  <meshPhysicalMaterial map={diffuse} normalMap={normal} roughnessMap={rough} />
+                   <meshPhysicalMaterial map={diffuse} normalMap={normal} roughnessMap={rough} roughness={0.5} metalness={0.5}/>
                 </Box>
               </RigidBody>
             );
@@ -111,7 +122,7 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
               position={[colIndex, 0.01, rowIndex]}
               args={[1, 0.02, 1]}
             >
-              <meshStandardMaterial color="white" emissive="white" />
+               <meshPhysicalMaterial map={diffuse2} normalMap={normal2} roughnessMap={rough2} roughness={0.5} metalness={0.5}/>
             </Box>
           )
         })
