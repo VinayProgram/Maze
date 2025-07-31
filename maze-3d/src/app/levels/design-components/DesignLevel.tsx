@@ -26,7 +26,9 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
     Array.from({ length: columns }, (_, colIndex) => {
       return {
         id: `${rowIndex}-${colIndex}`,
-        type: "path",
+        type:{
+          type:"path",
+        },
         isStart: false,
         isEnd: false,
         isHazard: false,
@@ -57,7 +59,7 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
     const baseStyle = "aspect-square flex items-center justify-center rounded-md transition-all duration-150 ease-in-out cursor-pointer transform hover:scale-105"
     let colorStyle = "" // Default path
 
-    if (cell.type === "wall") {
+    if (cell.type.type === "wall") {
       colorStyle = "bg-slate-900 border-slate-600 shadow-inner"
     } else if (cell.isStart) {
       colorStyle = "bg-emerald-500/20 border-emerald-500"
@@ -83,8 +85,8 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
     if (cell.isHazard) return <Skull {...iconProps} className="text-yellow-400" />
     if(cell.props) return <TreesIcon {...iconProps} className="text-green-400"/>
     if (cell.isPortal) return <MessageCircleQuestion {...iconProps} className="text-violet-400" />
-    if (cell.type === 'wall') return <BrickWall {...iconProps} className="text-amber-800"/>
-    if(cell.type === 'path') return <SquareIcon {...iconProps} className="text-slate-400"/>
+    if (cell.type.type === 'wall') return <BrickWall {...iconProps} className="text-amber-800"/>
+    if(cell.type.type === 'path') return <SquareIcon {...iconProps} className="text-slate-400"/>
    
   }
 
@@ -106,7 +108,7 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
                 Maze Forge
               </h1>
               <p className="text-slate-400 text-sm md:text-base mt-1">
-                Design your level. Current selection: <span className="font-semibold text-cyan-400">{mazeSelectecdType.type}</span>
+                Design your level. Current selection: <span className="font-semibold text-cyan-400">{mazeSelectecdType.type.type}</span>
               </p>
             </div>
           </header>
@@ -155,8 +157,8 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
          <React.Suspense fallback={<div>Loading...</div>}>
         <Canvas>
           <Physics>
-            <ambientLight intensity={0.5} />
-            <directionalLight position={[1, 1, 1]} intensity={0.5} />
+            <ambientLight intensity={2} />
+            <directionalLight position={[1, 1, 1]} intensity={2} />
             <OrbitControls />
             <Maze mazeRef={mazeRef} />
           </Physics>

@@ -22,25 +22,58 @@ import { Label } from "./ui/label"
 import { useMazeCellStore } from "@/store/mazeStore"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Separator } from "./ui/separator"
-import { TreesIcon } from "lucide-react"
+import { MountainIcon, TreesIcon } from "lucide-react"
+import type { MazeCell } from "@/app/levels/maze"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { selectedCell, setSelectedCell } = useMazeCellStore()
 
-  // Helper to determine the current path subtype from the state's boolean flags
-  const getPathSubType = () => {
-    if (selectedCell.isStart) return "start"
-    if (selectedCell.isEnd) return "end"
-    if (selectedCell.isHazard) return "hazard"
-    if (selectedCell.isPortal) return "portal"
-    if(selectedCell.props) return "prop"
-    return "normal" // Default path type
+  const getPropSubType=(value:string):MazeCell['type']=>{
+   switch(value){
+    case "rock-wall":
+      return {
+        type: "wall",
+        props: {
+          url: "/blocky_rocks.glb",
+          positionY: 0.01,
+          scale:0.001
+        }
+      }
+    case "normal-path":
+      return {
+        type: "path",
+        props: undefined
+      }
+    case "normal-wall":
+      return {
+        type: "wall",
+        props: undefined
+      }
+    case "rock-wall-2":
+      return {
+        type: "wall",
+        props: {
+          url: "/stylized_rocks.glb",
+          positionY: 0,
+          scale:0.20
+        }
+      }
+    default:
+      return {
+        type: "path",
+        props: undefined
+      }
+   }
   }
 
+ 
   // Helper to update the state when a path subtype is selected
   const handleSubTypeChange = (value: string) => {
+
+  const typeInheritance = getPropSubType(value)
+   
     setSelectedCell({
-      type: "path", // Ensure type is path
+      type: typeInheritance, // Ensure type is path
       isStart: value === "start",
       isEnd: value === "end",
       isHazard: value === "hazard",
@@ -48,15 +81,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       props:value === "prop" ? {url:'/stylized_tree.glb'} : undefined
     })
   }
+
+ 
   
   // An array to easily render the path subtype options
   const pathSubTypes = [
-    { value: "normal", label: "Normal", icon: IconCircle },
+    { value: "normal-path", label: "Normal", icon: IconCircle },
     { value: "start", label: "Start Point", icon: IconWalk },
     { value: "end", label: "End Point", icon: IconFlag },
     { value: "hazard", label: "Hazard", icon: IconSkull },
     { value: "portal", label: "Portal", icon: IconCircle },
     { value: "prop", label: "Prop", icon: TreesIcon },
+  ]
+
+  const WallSubTypes = [
+    { value: "normal-wall", label: "Normal", icon: IconCircle },
+    { value: "rock-wall", label: "Rock Wall", icon: MountainIcon },
+    { value: "rock-wall-2", label: "Rock Wall 2", icon: MountainIcon },
   ]
 
   return (
@@ -85,13 +126,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             Cell Type
           </Label>
           <RadioGroup
-            value={selectedCell.type}
+            value={selectedCell.type.type}
             onValueChange={(val) => {
-              // When switching to 'wall', reset all path-specific flags
-              if (val === 'wall') {
-                handleSubTypeChange('none'); // Resets all booleans to false
-              }
-              setSelectedCell({ type: val as "wall" | "path" })
+              setSelectedCell({
+                type: {
+                  type: val as "wall" | "path",
+                },
+                isStart: false,
+                isEnd: false,
+                isHazard: false,
+                isPortal: false,
+                props: undefined,
+              })
             }}
             className="mt-2 space-y-1"
           >
@@ -111,17 +157,35 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <Separator className="bg-slate-800" />
 
         {/* Conditional Path Subtype Section */}
-        {selectedCell.type === "path" && (
+        {selectedCell.type.type === "path" && (
           <div className="flex flex-col gap-3 animate-in fade-in duration-300">
             <Label className="text-sm font-semibold text-slate-300">
               Path Properties
             </Label>
             <RadioGroup
-              value={getPathSubType()}
               onValueChange={handleSubTypeChange}
               className="space-y-1 pl-2"
             >
               {pathSubTypes.map(({ value, label, icon: Icon }) => (
+                 <Label key={value} htmlFor={value} className="flex items-center gap-3 p-2 rounded-md hover:bg-slate-800/50 cursor-pointer transition-colors">
+                    <Icon className="size-5 text-slate-400"/>
+                    <RadioGroupItem value={value} id={value} />
+                    <span>{label}</span>
+                 </Label>
+              ))}
+            </RadioGroup>
+          </div>
+        )}
+        {selectedCell.type.type === "wall" && (
+          <div className="flex flex-col gap-3 animate-in fade-in duration-300">
+            <Label className="text-sm font-semibold text-slate-300">
+              Wall Properties
+            </Label>
+            <RadioGroup
+              onValueChange={handleSubTypeChange}
+              className="space-y-1 pl-2"
+            >
+              {WallSubTypes.map(({ value, label, icon: Icon }) => (
                  <Label key={value} htmlFor={value} className="flex items-center gap-3 p-2 rounded-md hover:bg-slate-800/50 cursor-pointer transition-colors">
                     <Icon className="size-5 text-slate-400"/>
                     <RadioGroupItem value={value} id={value} />

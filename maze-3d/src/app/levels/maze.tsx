@@ -1,5 +1,5 @@
 import { useMazeCellStore } from '@/store/mazeStore';
-import { Box } from '@react-three/drei'
+import { Box, Plane } from '@react-three/drei'
 import { useLoader } from '@react-three/fiber';
 import { CuboidCollider, RigidBody } from '@react-three/rapier';
 import React from 'react';
@@ -7,14 +7,21 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three-stdlib';
 
 export interface MazeCell {
-  type: 'wall' | 'path';
+  type: {
+    type: 'wall' | 'path';
+    props?: {
+      scale: number,
+      positionY: number,
+      url: string
+    }
+  };
   isStart?: boolean;
   isEnd?: boolean;
   isHazard?: boolean;
   isPortal?: boolean;
   id: string;
-  props?:{
-    url:string
+  props?: {
+    url: string
   }
 }
 
@@ -22,46 +29,12 @@ export interface MazeCell {
 export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => {
   const maze = useMazeCellStore((state) => state.level)
 
-  const [diffuse, normal,rough] = useLoader(THREE.TextureLoader, [
-    '/textures/rock_wall_13_diff_1k.jpg',
-    '/textures/rock_wall_13_nor_gl_1k.jpg',
-    '/textures/rock_wall_13_rough_1k.jpg',
-  ]);
-  [diffuse, normal].forEach((tex) => {
-    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(1, 1);
-  });
 
-  const [diffuse2, normal2,rough2] = useLoader(THREE.TextureLoader, [
-    '/textures/aerial_grass_rock_diff_1k.jpg',
-    '/textures/aerial_grass_rock_nor_gl_1k.jpg',
-    '/textures/aerial_grass_rock_rough_1k.jpg',
-  ]);
-  [diffuse2, normal2].forEach((tex) => {
-    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(2, 2);
-  });
   return (
     <group ref={mazeRef}>
       {maze.map((row, rowIndex) =>
         row.map((cell, colIndex) => {
           // 3. Render based on the 'type' property
-          if (cell.type === 'wall') {
-            return (
-              <RigidBody type="fixed" key={`${rowIndex}-${colIndex}-wall`}>
-                <Box
-                  onClick={() => {
-                    console.log(cell.id)
-                  }}
-                  position={[colIndex, 0.5, rowIndex]} // Standard 1x1x1 cube
-                  args={[1, 1, 1]}
-                >
-                   <meshPhysicalMaterial map={diffuse} normalMap={normal} roughnessMap={rough} />
-                </Box>
-              </RigidBody>
-            );
-          }
-
           if (cell.isStart) {
             return (
               <Box
@@ -111,22 +84,17 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
             );
           }
 
-          if(cell.props){
-           return(
-            <PropLoader url={cell.props.url} position={[colIndex, 0.01, rowIndex]}  key={`${rowIndex}-${colIndex}-prop`} />
-           ) 
+          if (cell.props) {
+            return (
+              <PropLoader url={cell.props.url} position={[colIndex, 0.01, rowIndex]} key={`${rowIndex}-${colIndex}-prop`} />
+            )
           }
-          return (
-            <Box
-              key={`${rowIndex}-${colIndex}-path`}
-              position={[colIndex, 0.01, rowIndex]}
-              args={[1, 0.02, 1]}
-            >
-               <meshPhysicalMaterial emissiveIntensity={0.1} emissive={'green'} map={diffuse2} normalMap={normal2} roughnessMap={rough2} 
-               roughness={1}  sheenRoughness={0.5}/>
-            </Box>
-          )
-        })
+          
+            return (
+              <TypeRender rowIndex={rowIndex} colIndex={colIndex} cell={cell} />
+            
+            );
+          })
       )}
       <CuboidCollider
         friction={2}
@@ -138,17 +106,94 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
   );
 };
 
+const TypeRender = ({ rowIndex, colIndex, cell}: {rowIndex: number, colIndex: number, cell: MazeCell}) => {
 
-const PropLoader=({url,position}:{
-  url:string,
-  position:[number,number,number],
-})=>{
-  const modelLoader = useLoader(GLTFLoader,url)
+  const [diffuse, normal, rough] = useLoader(THREE.TextureLoader, [
+    '/textures/rock_wall_13_diff_1k.jpg',
+    '/textures/rock_wall_13_nor_gl_1k.jpg',
+    '/textures/rock_wall_13_rough_1k.jpg',
+  ]);
+  [diffuse, normal].forEach((tex) => {
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(1, 1);
+  });
+
+  const [diffuse2, normal2, rough2] = useLoader(THREE.TextureLoader, [
+    '/textures/aerial_grass_rock_diff_1k.jpg',
+    '/textures/aerial_grass_rock_nor_gl_1k.jpg',
+    '/textures/aerial_grass_rock_rough_1k.jpg',
+  ]);
+  [diffuse2, normal2].forEach((tex) => {
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(2, 2);
+  });
+
+  switch (cell.type.type) {
+    case 'wall':
+      { 
+      const props = cell.type.props
+      if(props) {
+        return (
+          <RigidBody type="fixed" colliders={false} key={`${rowIndex}-${colIndex}-wall`}>
+          <PropLoader url={props.url} position={[colIndex, props.positionY, rowIndex]} scale={props.scale} />
+          <CuboidCollider
+            args={[0.5, 0.5, 0.5]} // X, Y, Z half-sizes → 1x1x1 cube
+            position={[colIndex, 0.5, rowIndex]}
+          />
+           <Plane
+            args={[1, 1]}
+            rotation={[-Math.PI / 2, 0, 0]}
+            position={[colIndex, 0.01, rowIndex]}
+          >
+            <meshPhysicalMaterial emissiveIntensity={0.1} emissive={'green'} map={diffuse2} normalMap={normal2} roughnessMap={rough2}
+          roughness={1} sheenRoughness={0.5} />
+          </Plane> 
+          </RigidBody>
+        )
+      } else {
+        return (
+          <RigidBody type="fixed" colliders={false} key={`${rowIndex}-${colIndex}-wall`}>
+          <Box
+            onClick={() => {
+              console.log(cell.id)
+            }}
+            position={[colIndex, 0.5, rowIndex]} // Standard 1x1x1 cube
+            args={[1, 1, 1]}
+          >
+             <meshPhysicalMaterial map={diffuse} normalMap={normal} roughnessMap={rough} />
+          </Box>
+          <CuboidCollider
+            args={[0.5, 0.5, 0.5]} // X, Y, Z half-sizes → 1x1x1 cube
+            position={[colIndex, 0.5, rowIndex]}
+          />
+        </RigidBody>
+        )
+      } }
+    case 'path':
+      return <Box
+        key={`${rowIndex}-${colIndex}-path`}
+        position={[colIndex, 0.01, rowIndex]}
+        args={[1, 0.02, 1]}
+      >
+        <meshPhysicalMaterial emissiveIntensity={0.1} emissive={'green'} map={diffuse2} normalMap={normal2} roughnessMap={rough2}
+          roughness={1} sheenRoughness={0.5} />
+      </Box>
+    default:
+      return null
+  }
+}
+
+const PropLoader = ({ url, position, scale = 0.1 }: {
+  url: string,
+  position: [number, number, number],
+  scale?: number
+}) => {
+  const modelLoader = useLoader(GLTFLoader, url)
   const clone = React.useMemo(() => modelLoader.scene.clone(true), [modelLoader]);
 
-  return(
-    <mesh scale={0.1} position={position}>
-    <primitive object={clone}  />
+  return (
+    <mesh scale={scale} position={position}>
+      <primitive object={clone} />
     </mesh>
   )
 }

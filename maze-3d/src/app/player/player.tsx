@@ -99,7 +99,7 @@ useFrame((state) => {
   const playerQuat = new THREE.Quaternion().copy(player.rotation());
   const cameraOffset = new THREE.Vector3(0, 0.6, -1).applyQuaternion(playerQuat);
   const desiredCameraPos = new THREE.Vector3().copy(smoothedPlayerPos.current).add(cameraOffset);
-  state.camera.position.lerp(desiredCameraPos, 0.10);
+  state.camera.position.lerp(desiredCameraPos, 0.15);
   state.camera.lookAt(smoothedPlayerPos.current);
 });
 
