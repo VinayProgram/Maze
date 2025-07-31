@@ -33,13 +33,13 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
   });
 
   const [diffuse2, normal2,rough2] = useLoader(THREE.TextureLoader, [
-    '/textures/brick_crosswalk_diff_1k.jpg',
-    '/textures/brick_crosswalk_nor_gl_1k.jpg',
-    '/textures/brick_crosswalk_rough_1k.jpg',
+    '/textures/aerial_grass_rock_diff_1k.jpg',
+    '/textures/aerial_grass_rock_nor_gl_1k.jpg',
+    '/textures/aerial_grass_rock_rough_1k.jpg',
   ]);
   [diffuse2, normal2].forEach((tex) => {
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(1, 1);
+    tex.repeat.set(2, 2);
   });
   return (
     <group ref={mazeRef}>
@@ -56,7 +56,7 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
                   position={[colIndex, 0.5, rowIndex]} // Standard 1x1x1 cube
                   args={[1, 1, 1]}
                 >
-                   <meshPhysicalMaterial map={diffuse} normalMap={normal} roughnessMap={rough} roughness={0.5} metalness={0.5}/>
+                   <meshPhysicalMaterial emissive={'white'} emissiveIntensity={0.01} map={diffuse} normalMap={normal} roughnessMap={rough} />
                 </Box>
               </RigidBody>
             );
@@ -122,7 +122,8 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
               position={[colIndex, 0.01, rowIndex]}
               args={[1, 0.02, 1]}
             >
-               <meshPhysicalMaterial map={diffuse2} normalMap={normal2} roughnessMap={rough2} roughness={0.5} metalness={0.5}/>
+               <meshPhysicalMaterial emissiveIntensity={0.1} emissive={'green'} map={diffuse2} normalMap={normal2} roughnessMap={rough2} 
+               roughness={1}  sheenRoughness={0.5}/>
             </Box>
           )
         })
