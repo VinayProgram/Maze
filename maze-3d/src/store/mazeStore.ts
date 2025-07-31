@@ -26,20 +26,12 @@ const mazeData: MazeCell[][] = [
     }, {
       "id": "0-3", "type": {
         type: "wall",
-        props: {
-          url: "/blocky_rocks.glb",
-          positionY: 0.01,
-          scale:0.001
-        }
+        
       }
     }, {
       "id": "0-4", "type": {
         type: "wall",
-        props: {
-          url: "/blocky_rocks.glb",
-          positionY: 0.01,
-          scale:0.001
-        }
+        
       }
     }, {
       "id": "0-5", "type": {
@@ -56,11 +48,7 @@ const mazeData: MazeCell[][] = [
     }, {
       "id": "0-8", "type": {
         type: "wall",
-        props: {
-          url: "/blocky_rocks.glb",
-          positionY: 0.01,
-          scale:0.001
-        }
+        
       }
     }, {
       "id": "0-9", "type": {
@@ -88,11 +76,7 @@ const mazeData: MazeCell[][] = [
     }, {
       "id": "1-3", "type": {
         type: "path",
-        props: {
-          url: "/blocky_rocks.glb",
-          positionY: 0.01,
-          scale:0.001
-        }
+        
       }
     }, {
       "id": "1-4", "type": {

@@ -9,7 +9,7 @@ import * as THREE from 'three'
 import { Canvas } from "@react-three/fiber"
 import { Physics } from "@react-three/rapier"
 import { OrbitControls } from "@react-three/drei"
-import { BrickWall, FlagIcon, ListStartIcon, MessageCircleQuestion, Play, RotateCcw, Save, Skull, SquareIcon, TreesIcon } from "lucide-react"
+import { BrickWall, DicesIcon, FlagIcon, ListStartIcon, MessageCircleQuestion, Play, RotateCcw, Save, Skull, SquareIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@radix-ui/react-separator"
 
@@ -50,7 +50,7 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
       isEnd: mazeSelectecdType.isEnd,
       isHazard: mazeSelectecdType.isHazard,
       isPortal: mazeSelectecdType.isPortal,
-      props:mazeSelectecdType.props
+
     }
     setMazeState(newMaze)
   }
@@ -70,7 +70,7 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
     } else if (cell.isPortal) {
       colorStyle = "bg-violet-500/20 border-violet-500"
     }
-    else if (cell.props) {
+    if(cell.type.type === "prop") {
       colorStyle = "bg-green-500/20 border-green-500"
     }
     
@@ -83,10 +83,10 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
     if (cell.isStart) return <ListStartIcon {...iconProps} className="text-emerald-400" />
     if (cell.isEnd) return <FlagIcon {...iconProps} className="text-rose-400" />
     if (cell.isHazard) return <Skull {...iconProps} className="text-yellow-400" />
-    if(cell.props) return <TreesIcon {...iconProps} className="text-green-400"/>
     if (cell.isPortal) return <MessageCircleQuestion {...iconProps} className="text-violet-400" />
     if (cell.type.type === 'wall') return <BrickWall {...iconProps} className="text-amber-800"/>
     if(cell.type.type === 'path') return <SquareIcon {...iconProps} className="text-slate-400"/>
+    if(cell.type.type === 'prop') return <DicesIcon {...iconProps} className="text-green-400"/>
    
   }
 

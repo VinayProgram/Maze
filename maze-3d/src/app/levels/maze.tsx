@@ -8,7 +8,7 @@ import { GLTFLoader } from 'three-stdlib';
 
 export interface MazeCell {
   type: {
-    type: 'wall' | 'path';
+    type: 'wall' | 'path' | 'prop';
     props?: {
       scale: number,
       positionY: number,
@@ -20,9 +20,6 @@ export interface MazeCell {
   isHazard?: boolean;
   isPortal?: boolean;
   id: string;
-  props?: {
-    url: string
-  }
 }
 
 
@@ -83,12 +80,6 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
               </Box>
             );
           }
-
-          if (cell.props) {
-            return (
-              <PropLoader url={cell.props.url} position={[colIndex, 0.01, rowIndex]} key={`${rowIndex}-${colIndex}-prop`} />
-            )
-          }
           
             return (
               <TypeRender rowIndex={rowIndex} colIndex={colIndex} cell={cell} />
@@ -140,14 +131,7 @@ const TypeRender = ({ rowIndex, colIndex, cell}: {rowIndex: number, colIndex: nu
             args={[0.5, 0.5, 0.5]} // X, Y, Z half-sizes → 1x1x1 cube
             position={[colIndex, 0.5, rowIndex]}
           />
-           <Plane
-            args={[1, 1]}
-            rotation={[-Math.PI / 2, 0, 0]}
-            position={[colIndex, 0.01, rowIndex]}
-          >
-            <meshPhysicalMaterial emissiveIntensity={0.1} emissive={'green'} map={diffuse2} normalMap={normal2} roughnessMap={rough2}
-          roughness={1} sheenRoughness={0.5} />
-          </Plane> 
+         
           </RigidBody>
         )
       } else {
@@ -178,6 +162,24 @@ const TypeRender = ({ rowIndex, colIndex, cell}: {rowIndex: number, colIndex: nu
         <meshPhysicalMaterial emissiveIntensity={0.1} emissive={'green'} map={diffuse2} normalMap={normal2} roughnessMap={rough2}
           roughness={1} sheenRoughness={0.5} />
       </Box>
+    case 'prop':{
+      if(cell.type.props) {
+        return (
+          <React.Fragment key={`${rowIndex}-${colIndex}-prop`}>
+          <Plane
+          args={[1, 1]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[colIndex, 0.01, rowIndex]}
+        >
+          <meshPhysicalMaterial emissiveIntensity={0.1} emissive={'green'} map={diffuse2} normalMap={normal2} roughnessMap={rough2}
+        roughness={1} sheenRoughness={0.5} />
+        </Plane> 
+          <PropLoader url={cell.type.props.url} position={[colIndex, cell.type.props.positionY, rowIndex]} scale={cell.type.props.scale} key={`${rowIndex}-${colIndex}-prop`} />
+          </React.Fragment>
+        )
+      }
+      return null
+    }
     default:
       return null
   }

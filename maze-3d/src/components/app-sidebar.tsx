@@ -22,7 +22,7 @@ import { Label } from "./ui/label"
 import { useMazeCellStore } from "@/store/mazeStore"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Separator } from "./ui/separator"
-import { MountainIcon, TreesIcon } from "lucide-react"
+import { HouseIcon, MountainIcon, TreesIcon } from "lucide-react"
 import type { MazeCell } from "@/app/levels/maze"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -58,6 +58,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           scale:0.20
         }
       }
+    case "prop":
+      return {
+        type: "prop",
+        props: {
+          url: "/stylized_tree.glb",
+          positionY: 0.001,
+          scale:0.1
+        }
+      }
+    case "old-house":
+      return {
+        type: "prop",
+        props: {
+          url: "/well.glb",
+          positionY: 0.001,
+          scale:0.05
+        }
+      }
     default:
       return {
         type: "path",
@@ -69,16 +87,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
  
   // Helper to update the state when a path subtype is selected
   const handleSubTypeChange = (value: string) => {
-
-  const typeInheritance = getPropSubType(value)
-   
+    const typeInheritance = getPropSubType(value)
     setSelectedCell({
       type: typeInheritance, // Ensure type is path
       isStart: value === "start",
       isEnd: value === "end",
       isHazard: value === "hazard",
       isPortal: value === "portal",
-      props:value === "prop" ? {url:'/stylized_tree.glb'} : undefined
     })
   }
 
@@ -91,7 +106,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     { value: "end", label: "End Point", icon: IconFlag },
     { value: "hazard", label: "Hazard", icon: IconSkull },
     { value: "portal", label: "Portal", icon: IconCircle },
-    { value: "prop", label: "Prop", icon: TreesIcon },
   ]
 
   const WallSubTypes = [
@@ -100,6 +114,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     { value: "rock-wall-2", label: "Rock Wall 2", icon: MountainIcon },
   ]
 
+  const PropSubTypes = [
+    { value: "prop", label: "Prop", icon: TreesIcon },
+    { value: "old-house", label: "Old House", icon: HouseIcon },
+  ]
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader className="border-b border-slate-800 p-0">
@@ -127,16 +145,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </Label>
           <RadioGroup
             value={selectedCell.type.type}
-            onValueChange={(val) => {
+            onValueChange={(val: "wall" | "path" |"prop") => {
+              console.log(val)
               setSelectedCell({
                 type: {
-                  type: val as "wall" | "path",
+                  type: val,
+                  props: val==="prop"?{
+                    url: "/stylized_tree.glb",
+                    positionY: 0.001,
+                    scale:0.1
+                  }:undefined
                 },
                 isStart: false,
                 isEnd: false,
                 isHazard: false,
                 isPortal: false,
-                props: undefined,
               })
             }}
             className="mt-2 space-y-1"
@@ -150,6 +173,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <IconWalk className="size-5 text-slate-400" />
               <RadioGroupItem value="path" id="path" />
               <span>Path</span>
+            </Label>
+            <Label htmlFor="prop" className="flex items-center gap-3 p-2 rounded-md hover:bg-slate-800/50 cursor-pointer transition-colors">
+              <IconWalk className="size-5 text-slate-400" />
+              <RadioGroupItem value="prop" id="prop" />
+              <span>Prop</span>
             </Label>
           </RadioGroup>
         </div>
@@ -195,10 +223,29 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </RadioGroup>
           </div>
         )}
+         {selectedCell.type.type === "prop" && (
+          <div className="flex flex-col gap-3 animate-in fade-in duration-300">
+            <Label className="text-sm font-semibold text-slate-300">
+              Prop Properties
+            </Label>
+            <RadioGroup
+              onValueChange={handleSubTypeChange}
+              className="space-y-1 pl-2"
+            >
+              {PropSubTypes.map(({ value, label, icon: Icon }) => (
+                 <Label key={value} htmlFor={value} className="flex items-center gap-3 p-2 rounded-md hover:bg-slate-800/50 cursor-pointer transition-colors">
+                    <Icon className="size-5 text-slate-400"/>
+                    <RadioGroupItem value={value} id={value} />
+                    <span>{label}</span>
+                 </Label>
+              ))}
+            </RadioGroup>
+          </div>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-slate-800 text-xs text-slate-500">
-        MazeForge v1.0
+        Maze
       </SidebarFooter>
     </Sidebar>
   )
