@@ -105,6 +105,7 @@ const Homepage = () => {
             <MazeHomepage />
           </Physics>
           <ambientLight intensity={1} />
+          <directionalLight position={[5, 10, 5]} />
         </Canvas>
       </div>
       {/* Scrollable sections */}
