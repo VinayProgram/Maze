@@ -56,7 +56,7 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
                   position={[colIndex, 0.5, rowIndex]} // Standard 1x1x1 cube
                   args={[1, 1, 1]}
                 >
-                   <meshPhysicalMaterial emissive={'white'} emissiveIntensity={0.01} map={diffuse} normalMap={normal} roughnessMap={rough} />
+                   <meshPhysicalMaterial map={diffuse} normalMap={normal} roughnessMap={rough} />
                 </Box>
               </RigidBody>
             );
