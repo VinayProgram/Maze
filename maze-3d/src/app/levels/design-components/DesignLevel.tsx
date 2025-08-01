@@ -12,6 +12,8 @@ import { OrbitControls } from "@react-three/drei"
 import { BrickWall, DicesIcon, FlagIcon, ListStartIcon, MessageCircleQuestion, Play, RotateCcw, Save, Skull, SquareIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@radix-ui/react-separator"
+import type { SaveLevelDTO } from "../services/dto/save-level"
+import { saveMazeLevel } from "../services/save-level"
 
 const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
   const mazeSize = currentStep[1].mazeSize
@@ -95,6 +97,18 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
     setMazeState(maze)
     setLevel(maze)
   }
+
+  const onSave = (e:React.MouseEvent<HTMLButtonElement>) => {
+    console.log('save')
+    const saveLevelDTO:SaveLevelDTO = {
+      id: mazeState[0][0].id,
+      title: currentStep[1].mazeName,
+      maze: JSON.stringify(mazeState),
+      likes: 0
+    }
+    saveMazeLevel(saveLevelDTO)
+    setLevel(mazeState)
+  }
     return (
       <div className="flex h-screen w-full bg-slate-950 text-slate-50">
       <SidebarProvider>
@@ -114,7 +128,7 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
           </header>
 
           <div className="flex flex-wrap items-center gap-2">
-            <Button onClick={() => setLevel(mazeState)}>
+            <Button onClick={onSave}>
               <Save className="mr-2 h-4 w-4" /> Save
             </Button>
             <Button variant="secondary" onClick={() => navigation.navigate({ to: '/game' })}>

@@ -42,7 +42,6 @@ const LevelDesign = () => {
     case 1:
       return <StepForm currentStep={currentStep} setStep={setStep} />
     case 2:
-      // This will render the beautifully designed DesignLevel component from before
       return <DesignLevel currentStep={currentStep} />
     default:
       return (
