@@ -82,7 +82,7 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
           }
           
             return (
-              <TypeRender rowIndex={rowIndex} colIndex={colIndex} cell={cell} />
+              <TypeRender key={`${rowIndex}-${colIndex}`} rowIndex={rowIndex} colIndex={colIndex} cell={cell} />
             
             );
           })
@@ -116,7 +116,7 @@ const TypeRender = ({ rowIndex, colIndex, cell}: {rowIndex: number, colIndex: nu
   ]);
   [diffuse2, normal2].forEach((tex) => {
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(2, 2);
+    tex.repeat.set(1, 1);
   });
 
   switch (cell.type.type) {
@@ -131,7 +131,14 @@ const TypeRender = ({ rowIndex, colIndex, cell}: {rowIndex: number, colIndex: nu
             args={[0.5, 0.5, 0.5]} // X, Y, Z half-sizes → 1x1x1 cube
             position={[colIndex, 0.5, rowIndex]}
           />
-         
+         <Plane
+          args={[1, 1]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[colIndex, 0.01, rowIndex]}
+        >
+          <meshPhysicalMaterial emissiveIntensity={0.1} emissive={'green'} map={diffuse2} normalMap={normal2} roughnessMap={rough2}
+        roughness={1} sheenRoughness={0.5} />
+        </Plane> 
           </RigidBody>
         )
       } else {

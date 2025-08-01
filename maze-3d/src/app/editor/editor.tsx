@@ -25,9 +25,9 @@ const Editor = () => {
         map={map}>
         <Canvas >
           <Physics>
-          <Sky sunPosition={[100, 20, 100]} />
+          <Sky sunPosition={[100, 10, 100]} />
           <ambientLight intensity={1} />
-          <directionalLight position={[5, 10, 5]} />
+          <directionalLight color={'lightyellow'} intensity={1} position={[0, 10, 0]} />
           <Player RigidRef={rigidRef} playerRef={playerRef} />
           <ThirdPersonCamera rigidBody={rigidRef} mazeRef={mazeRef} />
           <Maze mazeRef={mazeRef}/>
