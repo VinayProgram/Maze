@@ -58,7 +58,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           scale:0.20
         }
       }
-    case "prop":
+    case "Tree":
       return {
         type: "prop",
         props: {
@@ -115,7 +115,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   ]
 
   const PropSubTypes = [
-    { value: "prop", label: "Prop", icon: TreesIcon },
+    { value: "Tree", label: "Tree", icon: TreesIcon },
     { value: "old-house", label: "Old House", icon: HouseIcon },
   ]
   return (
