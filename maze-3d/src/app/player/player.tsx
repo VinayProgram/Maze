@@ -32,7 +32,7 @@ const Player = ({ RigidRef, playerRef }: { RigidRef: React.RefObject<RapierRigid
     }
   }, [fbx])
   useFrame((_state,delta) => {
-    const speed = (shiftPressed||controlsZustand.shift)?2:1
+    let speed = (shiftPressed||controlsZustand.shift)?2:1
     const velocity = new THREE.Vector3()
     const rigid = RigidRef.current
     const player = playerRef.current
@@ -49,8 +49,21 @@ const Player = ({ RigidRef, playerRef }: { RigidRef: React.RefObject<RapierRigid
     if (backwardPressed || controlsZustand.backward) {
       velocity.add(direction.current.clone().multiplyScalar(-speed))
     }
-    if (leftPressed || controlsZustand.left) angle.current += 0.05
-    if (rightPressed || controlsZustand.right) angle.current -= 0.05
+    if (leftPressed || controlsZustand.left) {
+      if(controlsZustand.left){
+        angle.current += 0.03    
+      }else{
+        angle.current += 0.05
+      }
+    
+    }
+    if (rightPressed || controlsZustand.right) {
+      if(controlsZustand.right){
+        angle.current -= 0.03    
+      }else{
+        angle.current -= 0.05
+      }
+    }
   
     quaternion.setFromAxisAngle(up, angle.current)
     rigid.setRotation(quaternion, true)
