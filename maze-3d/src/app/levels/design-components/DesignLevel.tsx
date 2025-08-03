@@ -176,7 +176,7 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
         </main>
         <div className="hidden lg:block lg:w-1/2 xl:w-1/3 border-l border-slate-800 h-full">
          <React.Suspense fallback={<div>Loading...</div>}>
-        <Canvas>
+        <Canvas fallback={<div>Loading...</div>}>
           <Physics>
             <ambientLight intensity={2} />
             <directionalLight position={[1, 1, 1]} intensity={2} />

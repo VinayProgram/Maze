@@ -65,12 +65,13 @@ const StepForm = ({
   // Handler for standard text inputs
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-
+    
     setStep((prev) => ({
       ...prev,
       1: {
         ...prev[1],
         [name]: value,
+        mazeSize: [Number(name==='customMazeSizeX'?value:prev[1].mazeSize[0]),Number(name==='customMazeSizeY'?value:prev[1].mazeSize[1])],
       },
     }))
   }

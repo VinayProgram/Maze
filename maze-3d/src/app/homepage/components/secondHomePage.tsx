@@ -141,7 +141,7 @@ const GameOptionsPage = () => {
           </div>
 
           {/* Design Level Card */}
-          <div className="design-card flex-1 group cursor-pointer" onClick={()=>handlePlayGame('/design-level')}>
+          <div className="design-card flex-1 group cursor-pointer" onClick={()=>handlePlayGame('/level-design')}>
             <div className="bg-gradient-to-br from-pink-800/30 to-purple-800/30 backdrop-blur-sm border border-pink-400/30 rounded-2xl p-8 h-80 flex flex-col justify-between hover:border-pink-400/60 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-pink-500/20">
               <div>
                 <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-500 rounded-xl mb-6 flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
