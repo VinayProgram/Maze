@@ -116,6 +116,22 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
     setLevel(mazeState)
   }
 
+  const saveAs=(e:React.MouseEvent<HTMLButtonElement>) => {
+   const mazeName = prompt("Enter maze name")
+   if(mazeName){
+    const saveLevelDTO:SaveLevelDTO = {
+      id: mazeState[0][0].id,
+      title: mazeName,
+      maze: JSON.stringify(mazeState),
+      likes: 0,
+      creatorName: "",
+      createdAt: new Date().toISOString()
+    }
+    saveMazeLevel(saveLevelDTO)
+    setLevel(mazeState)
+   } 
+  }
+
     return (
       <div className="flex h-screen w-full bg-slate-950 text-slate-50">
       <SidebarProvider>
@@ -137,6 +153,9 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
           <div className="flex flex-wrap items-center gap-2">
             <Button onClick={onSave}>
               <Save className="mr-2 h-4 w-4" /> Save
+            </Button>
+            <Button onClick={saveAs}>
+              <Save className="mr-2 h-4 w-4" /> Save As
             </Button>
             <Button variant="secondary" onClick={() => navigation.navigate({ to: '/game' })}>
               <Play className="mr-2 h-4 w-4" /> Play
