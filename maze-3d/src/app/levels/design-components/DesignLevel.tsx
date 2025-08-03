@@ -99,7 +99,7 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
     setLevel(maze)
   }
 
-  const onSave = (e:React.MouseEvent<HTMLButtonElement>) => {
+  const onSave = () => {
     if(currentStep[1].mazeName==="view-only"){
       console.log("view-only")
       return toast("Please enter a maze name before saving.")
@@ -116,7 +116,7 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
     setLevel(mazeState)
   }
 
-  const saveAs=(e:React.MouseEvent<HTMLButtonElement>) => {
+  const saveAs=() => {
    const mazeName = prompt("Enter maze name")
    if(mazeName){
     const saveLevelDTO:SaveLevelDTO = {

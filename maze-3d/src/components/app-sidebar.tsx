@@ -22,7 +22,7 @@ import { Label } from "./ui/label"
 import { useMazeCellStore } from "@/store/mazeStore"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Separator } from "./ui/separator"
-import { HouseIcon, MountainIcon, SpaceIcon, TreesIcon } from "lucide-react"
+import { HouseIcon, MountainIcon, TreesIcon } from "lucide-react"
 import type { MazeCell } from "@/app/levels/maze"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

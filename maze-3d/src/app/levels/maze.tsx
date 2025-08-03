@@ -1,5 +1,5 @@
 import { useMazeCellStore } from '@/store/mazeStore';
-import { Box, Plane, Stars, useGLTF } from '@react-three/drei'
+import { Box, Plane } from '@react-three/drei'
 import { useFrame, useLoader } from '@react-three/fiber';
 import { CuboidCollider, RigidBody, type IntersectionEnterPayload } from '@react-three/rapier';
 import { useRouter } from '@tanstack/react-router';
@@ -41,7 +41,7 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
 
   }
 
-  const onWon = (payload: IntersectionEnterPayload) => {
+  const onWon = (_payload: IntersectionEnterPayload) => {
     setIsLost("won")
   }
 
