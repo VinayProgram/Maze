@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import type { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
-import { Heart, User, Calendar, Search, Frown, Play, EyeIcon, WineIcon, TrophyIcon } from "lucide-react";
+import { Heart, User, Calendar, Search, Frown, Play, EyeIcon, TrophyIcon } from "lucide-react";
 
 import { useMazeLevels } from "../services/get-levels";
 import {

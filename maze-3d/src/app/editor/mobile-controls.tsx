@@ -11,7 +11,6 @@ const MobileControls = () => {
   const handleJoystickMove = (event: IJoystickUpdateEvent) => {
     if(!event.x || !event.y) return
     const x = event.x*100
-    const y = event.y*100
     // Threshold to avoid noise
     const threshold = 30
 
