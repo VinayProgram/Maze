@@ -113,7 +113,7 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
                   }}
                 />
 
-                {isLost ?
+                {isLost==="lost" ?
                   <React.Suspense>
                     <PropLoader url={'/ghost_kitty.glb'} position={[colIndex, 0.01, rowIndex]} scale={0.3} ref={ghostRef}></PropLoader>
                   </React.Suspense> :
