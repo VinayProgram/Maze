@@ -104,11 +104,14 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
       id: mazeState[0][0].id,
       title: currentStep[1].mazeName,
       maze: JSON.stringify(mazeState),
-      likes: 0
+      likes: 0,
+      creatorName: "",
+      createdAt: new Date().toISOString()
     }
     saveMazeLevel(saveLevelDTO)
     setLevel(mazeState)
   }
+
     return (
       <div className="flex h-screen w-full bg-slate-950 text-slate-50">
       <SidebarProvider>

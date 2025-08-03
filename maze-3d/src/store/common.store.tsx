@@ -16,6 +16,14 @@ type Store = {
   resetControls: () => void
 }
 
+export interface Step {
+  activeStep: number
+  1: {
+    mazeName: string
+    mazeSize: [number, number]
+  }
+}
+
 export const useStore = create<Store>()((set) => ({
   playerDirection: 0,
   controls: {

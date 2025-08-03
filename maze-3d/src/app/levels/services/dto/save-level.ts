@@ -4,5 +4,6 @@ export interface SaveLevelDTO {
     title:string,
     maze:string
     likes:number
-
+    creatorName?:string
+    createdAt:string
 }

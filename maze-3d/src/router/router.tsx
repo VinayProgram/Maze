@@ -2,6 +2,8 @@ import { createRootRoute, createRoute, createRouter } from "@tanstack/react-rout
 import Homepage from "@/app/homepage/homepage";
 import LevelDesign from "@/app/levels/level-design";
 import Editor from "@/app/editor/editor";
+import GetLevels from "@/app/levels/design-components/GetLevels";
+import DesignLevel from "@/app/levels/design-components/DesignLevel";
 
 
 const rootRoute = createRootRoute()
@@ -23,7 +25,18 @@ const LevelDesignRoute = createRoute({
     component: ()=><LevelDesign/>,
 })
 
-const routeTree = rootRoute.addChildren([indexRoute,GameRoute,LevelDesignRoute])
+const ViewLevel = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/design-level',
+    component: ()=><DesignLevel currentStep={{"1": {mazeSize: [10, 10],"mazeName":"demo"},activeStep:2}}/>,
+})
+
+const Levels = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/level',
+    component: ()=><GetLevels/>,
+})
+const routeTree = rootRoute.addChildren([indexRoute,GameRoute,LevelDesignRoute,Levels,ViewLevel])
 
 declare module '@tanstack/react-router' {
     interface Register {
