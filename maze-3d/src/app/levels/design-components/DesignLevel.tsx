@@ -101,8 +101,7 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
 
   const onSave = () => {
     if(currentStep[1].mazeName==="view-only"){
-      console.log("view-only")
-      return toast("Please enter a maze name before saving.")
+      return toast("You cannot Edit Level")
     }
     const saveLevelDTO:SaveLevelDTO = {
       id: mazeState[0][0].id,
@@ -114,6 +113,7 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
     }
     saveMazeLevel(saveLevelDTO)
     setLevel(mazeState)
+    return toast("Level Saved Successfully")
   }
 
   const saveAs=() => {
@@ -157,7 +157,7 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
             <Button onClick={saveAs}>
               <Save className="mr-2 h-4 w-4" /> Save As
             </Button>
-            <Button variant="secondary" onClick={() => navigation.navigate({ to: '/game' })}>
+            <Button variant="secondary" onClick={() => navigation.navigate({ to: '/game/$id',params:{id:'demo-level-creation'} })}>
               <Play className="mr-2 h-4 w-4" /> Play
             </Button>
             <Button variant="destructive" onClick={resetMaze}>

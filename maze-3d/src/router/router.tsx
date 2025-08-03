@@ -15,7 +15,7 @@ const indexRoute = createRoute({
 
 const GameRoute = createRoute({
     getParentRoute: () => rootRoute,
-    path: '/game',
+    path: '/game/$id',
     component: ()=><Editor/>,
 })
 

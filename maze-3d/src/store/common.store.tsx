@@ -6,6 +6,7 @@ type Controls = {
   left: boolean
   right: boolean
   jump: boolean
+  shift: boolean
 }
 
 type Store = {
@@ -32,6 +33,7 @@ export const useStore = create<Store>()((set) => ({
     left: false,
     right: false,
     jump: false,
+    shift: false,
   },
   setPlayerDirection: (direction: number) => set({ playerDirection: direction }),
   setControl: (key, value) =>
@@ -49,6 +51,7 @@ export const useStore = create<Store>()((set) => ({
         left: false,
         right: false,
         jump: false,
+        shift: false,
       },
     })),
 }))

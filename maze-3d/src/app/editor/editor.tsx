@@ -14,7 +14,7 @@ const Editor = () => {
     { name: ControlsEnum.back, keys: ['ArrowDown', 'KeyS'] },
     { name: ControlsEnum.left, keys: ['ArrowLeft', 'KeyA'] },
     { name: ControlsEnum.right, keys: ['ArrowRight', 'KeyD'] }, 
-    { name: ControlsEnum.jump, keys: ['Space'] },
+    { name: ControlsEnum.shift, keys: ['Shift'] },
   ], [])
   const playerRef = useRef<THREE.Group>(null!)
   const mazeRef = useRef<THREE.Group>(null!)

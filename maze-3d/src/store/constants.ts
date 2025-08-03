@@ -4,4 +4,5 @@ export enum ControlsEnum {
     left = 'ArrowLeft',
     right = 'ArrowRight',
     jump = 'Space',
+    shift = 'Shift',
   }

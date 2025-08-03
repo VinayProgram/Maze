@@ -1,65 +1,57 @@
+// src/components/JoystickControls.tsx
+
 import { useStore } from '@/store/common.store'
-import { ControlsEnum } from '@/store/constants'
+import { Joystick } from 'react-joystick-component'
+import type { IJoystickUpdateEvent } from 'react-joystick-component/build/lib/Joystick'
 
 const MobileControls = () => {
   const setControl = useStore((state) => state.setControl)
-
-  const handlePress = (key: ControlsEnum, isPressed: boolean) => {
-    // map ControlsEnum to Zustand keys
-    const keyMap = {
-      [ControlsEnum.forward]: 'forward',
-      [ControlsEnum.back]: 'backward',
-      [ControlsEnum.left]: 'left',
-      [ControlsEnum.right]: 'right',
-      [ControlsEnum.jump]: 'jump',
-    } as const
-
-    const zustandKey = keyMap[key]
-    if (zustandKey) {
-      setControl(zustandKey, isPressed)
+  const controls = useStore((state) => state.controls)
+  const handleJoystickMove = (event: IJoystickUpdateEvent) => {
+    setControl('forward', false)
+    setControl('backward', false)
+    setControl('left', false)
+    setControl('right', false)
+    if (event.direction) {
+      if (event.direction.includes('FORWARD')) setControl('forward', true)
+      if (event.direction.includes('BACKWARD')) setControl('backward', true)
+      if (event.direction.includes('LEFT')) setControl('left', true)
+      if (event.direction.includes('RIGHT')) setControl('right', true)
     }
   }
 
+  const handleJoystickStop = () => {
+    setControl('forward', false)
+    setControl('backward', false)
+    setControl('left', false)
+    setControl('right', false)
+  }
+  
+  const handleShiftPress = () => {
+    setControl('shift', !controls.shift);
+  }
+
   return (
-    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 flex gap-4">
-      {/* Left */}
-      <button
-        className="w-16 h-16 bg-gray-800 text-white rounded-full flex items-center justify-center active:scale-95 touch-manipulation"
-        onTouchStart={() => handlePress(ControlsEnum.left, true)}
-        onTouchEnd={() => handlePress(ControlsEnum.left, false)}
-      >
-        ⬅️
-      </button>
-
-      <div className="flex flex-col gap-4">
-        {/* Up */}
-        <button
-          className="w-16 h-16 bg-gray-800 text-white rounded-full flex items-center justify-center active:scale-95 touch-manipulation"
-          onTouchStart={() => handlePress(ControlsEnum.forward, true)}
-          onTouchEnd={() => handlePress(ControlsEnum.forward, false)}
-        >
-          ⬆️
-        </button>
-
-        {/* Down */}
-        <button
-          className="w-16 h-16 bg-gray-800 text-white rounded-full flex items-center justify-center active:scale-95 touch-manipulation"
-          onTouchStart={() => handlePress(ControlsEnum.back, true)}
-          onTouchEnd={() => handlePress(ControlsEnum.back, false)}
-        >
-          ⬇️
-        </button>
+    <>
+      <div className="absolute bottom-8 left-8 z-50">
+        <Joystick
+          size={100}
+          baseColor="rgba(17, 24, 39, 0.7)"
+          stickColor="rgba(55, 65, 81, 0.9)"
+          move={handleJoystickMove}
+          stop={handleJoystickStop}
+        />
       </div>
 
-      {/* Right */}
-      <button
-        className="w-16 h-16 bg-gray-800 text-white rounded-full flex items-center justify-center active:scale-95 touch-manipulation"
-        onTouchStart={() => handlePress(ControlsEnum.right, true)}
-        onTouchEnd={() => handlePress(ControlsEnum.right, false)}
-      >
-        ➡️
-      </button>
-    </div>
+      <div className="absolute bottom-8 right-8 z-50">
+        <button
+          className="w-20 h-20 bg-gray-800/70 text-white rounded-full flex items-center justify-center active:scale-95 touch-manipulation"
+          onClick={() => handleShiftPress()}
+        >
+           <span className="text-3xl">{controls.shift ? '🏃' : '🚶‍♂️'}</span>
+        </button>
+      </div>
+    </>
   )
 }
 

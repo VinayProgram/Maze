@@ -2,11 +2,14 @@ import { useMazeCellStore } from '@/store/mazeStore';
 import { Box, Plane } from '@react-three/drei'
 import { useFrame, useLoader } from '@react-three/fiber';
 import { CuboidCollider, RigidBody, type IntersectionEnterPayload } from '@react-three/rapier';
-import { useRouter } from '@tanstack/react-router';
+import { useParams, useRouter } from '@tanstack/react-router';
 import React from 'react';
 import * as THREE from 'three'
 import { GLTFLoader } from 'three-stdlib';
 import { useAnimations } from '@react-three/drei';
+import { DialogContext } from '@/components/portalcustom/custom-portal-context';
+import SavePlayerRatings from '../player/components/save-player-ratings';
+import { toast } from 'sonner';
 
 export interface MazeCell {
   type: {
@@ -28,21 +31,24 @@ export interface MazeCell {
 export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => {
   const maze = useMazeCellStore((state) => state.level)
   const navigate = useRouter()
-
+  const id  = useParams({from: '/game/$id',shouldThrow:false})
+  const DailogContext = React.useContext(DialogContext)
   const [isLost, setIsLost] = React.useState<'lost' | 'won' | 'idle'>("idle")
   const ghostRef = React.useRef<THREE.Mesh>(null!)
   const winnerRef = React.useRef<THREE.Mesh>(null!)
   const onLost = (payload: IntersectionEnterPayload) => {
     payload.rigidBodyObject?.scale.set(0, 0, 0)
     setIsLost("lost")
+    toast.error("You Lost")
     setTimeout(() => {
       navigate.navigate({ to: "/level" })
-    }, 5000)
+    }, 10000)
 
   }
 
   const onWon = (_payload: IntersectionEnterPayload) => {
     setIsLost("won")
+    DailogContext.setComponent(<SavePlayerRatings levelId={id?.id+""}/>)
   }
 
   useFrame(() => {

@@ -16,6 +16,7 @@ const Player = ({ RigidRef, playerRef }: { RigidRef: React.RefObject<RapierRigid
   const backwardPressed = useKeyboardControls<ControlsEnum>(s => s.ArrowDown)
   const leftPressed = useKeyboardControls<ControlsEnum>(s => s.ArrowLeft)
   const rightPressed = useKeyboardControls<ControlsEnum>(s => s.ArrowRight)
+  const shiftPressed = useKeyboardControls<ControlsEnum>(s => s.Shift)
   const direction = useRef(new THREE.Vector3())
   const angle = useRef(0) // Track Y-axis angle
   const quaternion = new THREE.Quaternion()
@@ -31,7 +32,7 @@ const Player = ({ RigidRef, playerRef }: { RigidRef: React.RefObject<RapierRigid
     }
   }, [fbx])
   useFrame((_state,delta) => {
-    const speed = 1
+    const speed = (shiftPressed||controlsZustand.shift)?2:1
     const velocity = new THREE.Vector3()
     const rigid = RigidRef.current
     const player = playerRef.current

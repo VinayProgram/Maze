@@ -115,7 +115,7 @@ export const MazeLevelsPage = () => {
 
   const onPlay = (level: SaveLevelDTO) => {
     setLevel(JSON.parse(level.maze))
-    navigation.navigate({ to: '/game' })
+    navigation.navigate({ to: '/game/$id',params:{id:level.id} })
   }
 
   const onEdit = (level: SaveLevelDTO) => {
