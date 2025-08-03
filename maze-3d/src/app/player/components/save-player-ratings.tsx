@@ -27,7 +27,7 @@ interface FormErrors {
   submitStats?: string;
 }
 
-export const SavePlayerRatings = ({levelId}: {levelId: string}) => {
+export const SavePlayerRatings = ({time,levelId}: {time:number,levelId: string}) => {
   // 1. State for form fields
   const [formData, setFormData] = React.useState<FormData>({
     name: "",
@@ -36,13 +36,8 @@ export const SavePlayerRatings = ({levelId}: {levelId: string}) => {
   });
   const {mutateAsync:mutateLikeStats} =useMutationLikeSaveStats()
   const {mutateAsync:mutateLikeCount}=useSaveLikeCount()
-  // 2. State for validation errors
   const [errors, setErrors] = React.useState<FormErrors>({});
-  
-  // 3. State for subm  ission status message
   const [submissionMessage, setSubmissionMessage] = React.useState("");
-
-  // Validation logic
   const validate = (): FormErrors => {
     const newErrors: FormErrors = {};
     if (formData.name.length < 2) {
@@ -73,6 +68,7 @@ export const SavePlayerRatings = ({levelId}: {levelId: string}) => {
         likedLevel: formData.likedLevel === "yes",
         levelId: levelId,
         createdAt: new Date().toString(),
+        completionTime: time
       })
       await mutateLikeCount({levelId:levelId,liked:formData.likedLevel === "yes"})
       // Hide the message after 3 seconds

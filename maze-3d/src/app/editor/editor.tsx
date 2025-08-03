@@ -30,7 +30,7 @@ const Editor = () => {
           <directionalLight color={'lightyellow'} intensity={1} position={[0, 10, 0]} />
           <Player RigidRef={rigidRef} playerRef={playerRef} />
           <ThirdPersonCamera rigidBody={rigidRef} mazeRef={mazeRef} />
-          <Maze mazeRef={mazeRef}/>
+          <Maze mazeRef={mazeRef} RigidRef={rigidRef}/>
           <OrbitControls />
           </Physics>
         </Canvas>

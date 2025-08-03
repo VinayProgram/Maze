@@ -1,7 +1,7 @@
 import { useMazeCellStore } from '@/store/mazeStore';
 import { Box, Plane } from '@react-three/drei'
 import { useFrame, useLoader } from '@react-three/fiber';
-import { CuboidCollider, RigidBody, type IntersectionEnterPayload } from '@react-three/rapier';
+import { CuboidCollider, RapierRigidBody, RigidBody, type IntersectionEnterPayload } from '@react-three/rapier';
 import { useParams, useRouter } from '@tanstack/react-router';
 import React from 'react';
 import * as THREE from 'three'
@@ -10,6 +10,8 @@ import { useAnimations } from '@react-three/drei';
 import { DialogContext } from '@/components/portalcustom/custom-portal-context';
 import SavePlayerRatings from '../player/components/save-player-ratings';
 import { toast } from 'sonner';
+import PortalLevelLogic from './design-components/PortalLevelLogic';
+import { useTimer } from '@/hooks/use-timer';
 
 export interface MazeCell {
   type: {
@@ -28,14 +30,25 @@ export interface MazeCell {
 }
 
 
-export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => {
+export const Maze = ({ mazeRef, RigidRef }: { mazeRef: React.RefObject<THREE.Group>, RigidRef?: React.RefObject<RapierRigidBody> }) => {
   const maze = useMazeCellStore((state) => state.level)
+  const timer = useTimer()
+  React.useEffect(() => {
+    if(RigidRef?.current){
+      timer.start()
+    }
+    return ()=>{
+      timer.reset()
+    }
+  }, [RigidRef])
+  
   const navigate = useRouter()
-  const id  = useParams({from: '/game/$id',shouldThrow:false})
+  const id = useParams({ from: '/game/$id', shouldThrow: false })
   const DailogContext = React.useContext(DialogContext)
   const [isLost, setIsLost] = React.useState<'lost' | 'won' | 'idle'>("idle")
   const ghostRef = React.useRef<THREE.Mesh>(null!)
   const winnerRef = React.useRef<THREE.Mesh>(null!)
+  const [portalLock, setPortalLock] = React.useState(false)
   const onLost = (payload: IntersectionEnterPayload) => {
     payload.rigidBodyObject?.scale.set(0, 0, 0)
     setIsLost("lost")
@@ -48,7 +61,27 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
 
   const onWon = (_payload: IntersectionEnterPayload) => {
     setIsLost("won")
-    DailogContext.setComponent(<SavePlayerRatings levelId={id?.id+""}/>)
+    DailogContext.setComponent(<SavePlayerRatings time={timer.seconds} levelId={id?.id + ""} />)
+  }
+
+  const onPortal = (_payload: IntersectionEnterPayload, currentid: string) => {
+    if (portalLock) {
+      toast.warning("Portal is locked")
+      return
+    }
+    DailogContext.setComponent(
+      <PortalLevelLogic id={currentid} cb={(id) => {
+        const splitID = id.split("-")
+        if (_payload.rigidBodyObject) {
+          RigidRef?.current?.setTranslation({ x: Number(splitID[1]), y: Number(0.01), z: Number(splitID[0]) }, true)
+          DailogContext.setComponent(null)
+          setPortalLock(true)
+          setTimeout(() => {
+            setPortalLock(false)
+          }, 5000)
+        }
+      }} />
+    )
   }
 
   useFrame(() => {
@@ -82,28 +115,28 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
           if (cell.isEnd) {
             return (
               <RigidBody type="fixed" colliders={false} key={`${rowIndex}-${colIndex}-hazard`}>
-              <CuboidCollider
-                sensor
-                args={[0.5, 0.5, 0.5]}
-                position={[colIndex, 0.1, rowIndex]}
-                onIntersectionEnter={(payload: IntersectionEnterPayload) => {
-                  onWon(payload)
-                }}
-              />
+                <CuboidCollider
+                  sensor
+                  args={[0.5, 0.5, 0.5]}
+                  position={[colIndex, 0.1, rowIndex]}
+                  onIntersectionEnter={(payload: IntersectionEnterPayload) => {
+                    onWon(payload)
+                  }}
+                />
 
-              {isLost==="won" ?
-                <React.Suspense>
-                  <PropLoader url={'/dancer_girl.glb'} position={[colIndex, 0.1, rowIndex]} scale={1} ref={winnerRef}></PropLoader>
-                </React.Suspense> :
-                <Box
-                key={`${rowIndex}-${colIndex}-end`}
-                position={[colIndex, 0.01, rowIndex]}
-                args={[1, 0.02, 1]}
-              >
-                <meshStandardMaterial color="dodgerblue" emissive="blue" />
-              </Box>}
-            </RigidBody>
-              
+                {isLost === "won" ?
+                  <React.Suspense>
+                    <PropLoader url={'/dancer_girl.glb'} position={[colIndex, 0.1, rowIndex]} scale={1} ref={winnerRef}></PropLoader>
+                  </React.Suspense> :
+                  <Box
+                    key={`${rowIndex}-${colIndex}-end`}
+                    position={[colIndex, 0.01, rowIndex]}
+                    args={[1, 0.02, 1]}
+                  >
+                    <meshStandardMaterial color="dodgerblue" emissive="blue" />
+                  </Box>}
+              </RigidBody>
+
             );
           }
 
@@ -119,7 +152,7 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
                   }}
                 />
 
-                {isLost==="lost" ?
+                {isLost === "lost" ?
                   <React.Suspense>
                     <PropLoader url={'/ghost_kitty.glb'} position={[colIndex, 0.01, rowIndex]} scale={0.3} ref={ghostRef}></PropLoader>
                   </React.Suspense> :
@@ -130,13 +163,20 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
 
           if (cell.isPortal) {
             return (
-              <Box
-                key={`${rowIndex}-${colIndex}-portal`}
-                position={[colIndex, 0.01, rowIndex]}
-                args={[1, 0.02, 1]}
-              >
-                <meshStandardMaterial color="purple" emissive="indigo" />
-              </Box>
+              <React.Suspense fallback={<Box args={[1, 1, 1]} position={[colIndex, 0.5, rowIndex]}></Box>}>
+                <RigidBody type="fixed" colliders={false} key={`${rowIndex}-${colIndex}-portal`}>
+                  <PropLoader url={'/door.glb'} position={[colIndex, 0.01, rowIndex]} scale={20} >
+                  </PropLoader>
+                  <CuboidCollider
+                    sensor
+                    args={[0.5, 0.5, 0.5]}
+                    position={[colIndex, 0.1, rowIndex]}
+                    onIntersectionEnter={(payload: IntersectionEnterPayload) => {
+                      onPortal(payload, cell.id)
+                    }}
+                  />
+                </RigidBody>
+              </React.Suspense>
             );
           }
 
@@ -157,26 +197,7 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
 };
 
 const TypeRender = ({ rowIndex, colIndex, cell }: { rowIndex: number, colIndex: number, cell: MazeCell }) => {
-
-  const [diffuse, normal, rough] = useLoader(THREE.TextureLoader, [
-    '/textures/rock_wall_13_diff_1k.jpg',
-    '/textures/rock_wall_13_nor_gl_1k.jpg',
-    '/textures/rock_wall_13_rough_1k.jpg',
-  ]);
-  [diffuse, normal].forEach((tex) => {
-    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(1, 1);
-  });
-
-  const [diffuse2, normal2, rough2] = useLoader(THREE.TextureLoader, [
-    '/textures/aerial_grass_rock_diff_1k.jpg',
-    '/textures/aerial_grass_rock_nor_gl_1k.jpg',
-    '/textures/aerial_grass_rock_rough_1k.jpg',
-  ]);
-  [diffuse2, normal2].forEach((tex) => {
-    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(1, 1);
-  });
+  const { diffuse2, normal2, rough2, rockDiffuse, rockNormal, rockRough } = useCustomMaterialHook()
 
   switch (cell.type.type) {
     case 'wall':
@@ -190,14 +211,7 @@ const TypeRender = ({ rowIndex, colIndex, cell }: { rowIndex: number, colIndex: 
                 args={[0.5, 0.5, 0.5]} // X, Y, Z half-sizes → 1x1x1 cube
                 position={[colIndex, 0.5, rowIndex]}
               />
-              <Plane
-                args={[1, 1]}
-                rotation={[-Math.PI / 2, 0, 0]}
-                position={[colIndex, 0.01, rowIndex]}
-              >
-                <meshPhysicalMaterial emissiveIntensity={0.1} emissive={'green'} map={diffuse2} normalMap={normal2} roughnessMap={rough2}
-                  roughness={1} sheenRoughness={0.5} />
-              </Plane>
+
             </RigidBody>
           )
         } else {
@@ -210,7 +224,7 @@ const TypeRender = ({ rowIndex, colIndex, cell }: { rowIndex: number, colIndex: 
                 position={[colIndex, 0.5, rowIndex]} // Standard 1x1x1 cube
                 args={[1, 1, 1]}
               >
-                <meshPhysicalMaterial map={diffuse} normalMap={normal} roughnessMap={rough} />
+                <meshPhysicalMaterial map={rockDiffuse} normalMap={rockNormal} roughnessMap={rockRough} />
               </Box>
               <CuboidCollider
                 args={[0.5, 0.5, 0.5]} // X, Y, Z half-sizes → 1x1x1 cube
@@ -220,27 +234,22 @@ const TypeRender = ({ rowIndex, colIndex, cell }: { rowIndex: number, colIndex: 
           )
         }
       }
-    case 'path':
-      return <Box
-        key={`${rowIndex}-${colIndex}-path`}
-        position={[colIndex, 0.01, rowIndex]}
-        args={[1, 0.02, 1]}
-      >
-        <meshPhysicalMaterial emissiveIntensity={0.1} emissive={'green'} map={diffuse2} normalMap={normal2} roughnessMap={rough2}
-          roughness={1} sheenRoughness={0.5} />
-      </Box>
+    case 'path': {
+      return (
+        <Box
+          key={`${rowIndex}-${colIndex}-path`}
+          position={[colIndex, 0.01, rowIndex]}
+          args={[1, 0.02, 1]}
+        >
+          <meshPhysicalMaterial emissiveIntensity={0.1} emissive={'green'} map={diffuse2} normalMap={normal2} roughnessMap={rough2}
+            roughness={1} sheenRoughness={0.5} />
+        </Box>
+      )
+    }
     case 'prop': {
       if (cell.type.props) {
         return (
           <React.Fragment key={`${rowIndex}-${colIndex}-prop`}>
-            <Plane
-              args={[1, 1]}
-              rotation={[-Math.PI / 2, 0, 0]}
-              position={[colIndex, 0.01, rowIndex]}
-            >
-              <meshPhysicalMaterial emissiveIntensity={0.1} emissive={'green'} map={diffuse2} normalMap={normal2} roughnessMap={rough2}
-                roughness={1} sheenRoughness={0.5} />
-            </Plane>
             <PropLoader url={cell.type.props.url} position={[colIndex, cell.type.props.positionY, rowIndex]} scale={cell.type.props.scale} key={`${rowIndex}-${colIndex}-prop`} />
           </React.Fragment>
         )
@@ -273,11 +282,11 @@ export const PropLoader = ({
   const model = useLoader(GLTFLoader, url)
   const clonedScene = React.useMemo(() => model.scene.clone(true), [model.scene])
   const groupRef = React.useRef<THREE.Group>(null)
-
+  const { diffuse2, normal2, rough2 } = useCustomMaterialHook()
   // Combine internal and external refs
   React.useEffect(() => {
     if (externalRef && groupRef.current) {
-      (externalRef as React.MutableRefObject<THREE.Object3D>).current = groupRef.current
+      (externalRef as React.RefObject<THREE.Object3D>).current = groupRef.current
     }
   }, [externalRef])
 
@@ -294,13 +303,47 @@ export const PropLoader = ({
   })
 
   return (
-    <primitive
-      ref={groupRef}
-      object={clonedScene}
-      position={position}
-      scale={scale}
-    />
+    <>
+
+      <Plane
+        args={[1, 1]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[position[0], 0.02, position[2]]}
+      >
+
+        <meshPhysicalMaterial emissiveIntensity={0.1} emissive={'green'} map={diffuse2} normalMap={normal2} roughnessMap={rough2}
+          roughness={1} sheenRoughness={0.5} />
+      </Plane>
+      <primitive
+        ref={groupRef}
+        object={clonedScene}
+        position={position}
+        scale={scale}
+      />
+    </>
+
   )
 }
 
 
+const useCustomMaterialHook = () => {
+  const [diffuse2, normal2, rough2] = useLoader(THREE.TextureLoader, [
+    '/textures/aerial_grass_rock_diff_1k.jpg',
+    '/textures/aerial_grass_rock_nor_gl_1k.jpg',
+    '/textures/aerial_grass_rock_rough_1k.jpg',
+  ]);
+  [diffuse2, normal2].forEach((tex) => {
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(1, 1);
+  });
+
+  const [rockDiffuse, rockNormal, rockRough] = useLoader(THREE.TextureLoader, [
+    '/textures/rock_wall_13_diff_1k.jpg',
+    '/textures/rock_wall_13_nor_gl_1k.jpg',
+  ]);
+  [rockDiffuse, rockNormal].forEach((tex) => {
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(1, 1);
+  });
+  return { diffuse2, normal2, rough2, rockDiffuse, rockNormal, rockRough }
+}

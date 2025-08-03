@@ -6,9 +6,14 @@ import {
   doc,
   updateDoc,
   increment,
+  query,
+  where,
+  orderBy,
+  limit,
+  getDocs,
 } from "firebase/firestore";
 import type { PlayerStatsDTO } from "../dto/type";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 /**
  * Saves a player's game session stats to the 'player-stats' collection.
@@ -79,4 +84,43 @@ export const useSaveLikeCount = ()=>{
   })
 }
 
+/**
+ * Retrieves the top 10 player stats for a level, ordered by the fastest completionTime.
+ * @param {string} levelId - The level ID to filter.
+ * @returns {Promise<PlayerStatsDTO[]>} - A list of top 10 stats.
+ */
+export const getTop10StatsByLevelId = async (levelId: string): Promise<PlayerStatsDTO[]> => {
+  try {
+    const statsCollection = collection(db, "player-stats");
+
+    const statsQuery = query(
+      statsCollection,
+      where("levelId", "==", levelId),
+      where("completionTime", "!=", null),
+      orderBy("completionTime", "asc"), // Ascending: lower time is better
+      limit(10)
+    );
+
+    const snapshot = await getDocs(statsQuery);
+
+    const stats: PlayerStatsDTO[] = snapshot.docs.map((doc) => ({
+      ...doc.data(),
+      createdAt: doc.data().createdAt,
+    })) as PlayerStatsDTO[];
+
+    return stats;
+  } catch (error) {
+    console.error("Error fetching top 10 stats: ", error);
+    return [];
+  }
+};
+
+export const useGetTop10StatsByLevelId = (levelId:string)=>{
+  return useQuery({
+    queryKey:["top-10-stats",levelId],
+    queryFn:async()=>await getTop10StatsByLevelId(levelId),
+    refetchOnWindowFocus:false,
+    staleTime:60*60*1000,
+  })
+}
 export default useMutationLikeSaveStats

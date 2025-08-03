@@ -82,7 +82,7 @@ const Player = ({ RigidRef, playerRef }: { RigidRef: React.RefObject<RapierRigid
   })
 
   return (
-    <RigidBody ref={RigidRef} colliders={false} mass={0} linearDamping={100} angularDamping={100}>
+    <RigidBody name='player' ref={RigidRef} colliders={false} mass={0} linearDamping={100} angularDamping={100}>
       <CuboidCollider args={[0.15, 0.02, 0.15]} >
         <primitive ref={playerRef} object={fbx} position={[0, 0, 0]} scale={0.001} />
       </CuboidCollider>

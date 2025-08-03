@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import type { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
-import { Heart, User, Calendar, Search, Frown, Play, EyeIcon } from "lucide-react";
+import { Heart, User, Calendar, Search, Frown, Play, EyeIcon, WineIcon, TrophyIcon } from "lucide-react";
 
 import { useMazeLevels } from "../services/get-levels";
 import {
@@ -24,6 +24,8 @@ import { useRouter } from "@tanstack/react-router";
 import type { SaveLevelDTO } from "../services/dto/save-level";
 import { Button } from "@/components/ui/button";
 import { useMazeCellStore } from "@/store/mazeStore";
+import { DialogContext } from "@/components/portalcustom/custom-portal-context";
+import LevelStats from "./LevelStats";
 
 // A debouncing custom hook to prevent API calls on every keystroke
 const useDebounce = (value: string, delay: number) => {
@@ -48,7 +50,7 @@ export const MazeLevelsPage = () => {
   const [page, setPage] = useState(0); // 0-indexed current page
   const [lastDocHistory, setLastDocHistory] = useState<(QueryDocumentSnapshot<DocumentData> | null)[]>([null]);
   const setLevel = useMazeCellStore((state) => state.setLevel)
-
+  const dailogContext = React.useContext(DialogContext)
   const currentLastDoc = lastDocHistory[page];
 
   const { data, isLoading, isError, isFetching } = useMazeLevels(
@@ -123,6 +125,10 @@ export const MazeLevelsPage = () => {
     navigation.navigate({ to: '/design-level' })
   }
 
+  const onStats = (level: SaveLevelDTO) => {
+    dailogContext.setComponent(<LevelStats levelId={level.id} />)
+  }
+
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
@@ -161,7 +167,7 @@ export const MazeLevelsPage = () => {
                     A challenging maze adventure awaits. Click to play!
                   </p>
                 </CardContent>
-                <CardFooter className="flex justify-between text-xs text-muted-foreground">
+                <CardFooter className="flex flex-wrap justify-between text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Heart className="h-4 w-4 text-red-500/80" />
                     <span>{level.likes.toLocaleString()} Likes</span>
@@ -170,12 +176,17 @@ export const MazeLevelsPage = () => {
                     <Calendar className="h-4 w-4" />
                     <span>{new Date(level.createdAt).toLocaleDateString()}</span>
                   </div>
+                  <div className="flex flex-wrap items-center gap-1">
+                  <Button variant="secondary" onClick={() => onStats(level)}>
+                    <TrophyIcon fill="gold" className="mr-2 h-4 w-4" /> Stats
+                  </Button>
                   <Button variant="secondary" onClick={() => onPlay(level)}>
                     <Play className="mr-2 h-4 w-4" /> Play
                   </Button>
                   <Button variant="secondary" onClick={() => onEdit(level)}>
                     <EyeIcon className="mr-2 h-4 w-4" /> View Level
                   </Button>
+                  </div>
                 </CardFooter>
               </Card>
             ))}
