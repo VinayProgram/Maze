@@ -1,10 +1,12 @@
 import { useMazeCellStore } from '@/store/mazeStore';
-import { Box, Plane } from '@react-three/drei'
-import { useLoader } from '@react-three/fiber';
-import { CuboidCollider, RigidBody } from '@react-three/rapier';
+import { Box, Plane, Stars, useGLTF } from '@react-three/drei'
+import { useFrame, useLoader } from '@react-three/fiber';
+import { CuboidCollider, RigidBody, type IntersectionEnterPayload } from '@react-three/rapier';
+import { useRouter } from '@tanstack/react-router';
 import React from 'react';
 import * as THREE from 'three'
 import { GLTFLoader } from 'three-stdlib';
+import { useAnimations } from '@react-three/drei';
 
 export interface MazeCell {
   type: {
@@ -25,6 +27,32 @@ export interface MazeCell {
 
 export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => {
   const maze = useMazeCellStore((state) => state.level)
+  const navigate = useRouter()
+
+  const [isLost, setIsLost] = React.useState<'lost' | 'won' | 'idle'>("idle")
+  const ghostRef = React.useRef<THREE.Mesh>(null!)
+  const winnerRef = React.useRef<THREE.Mesh>(null!)
+  const onLost = (payload: IntersectionEnterPayload) => {
+    payload.rigidBodyObject?.scale.set(0, 0, 0)
+    setIsLost("lost")
+    setTimeout(() => {
+      navigate.navigate({ to: "/level" })
+    }, 5000)
+
+  }
+
+  const onWon = (payload: IntersectionEnterPayload) => {
+    setIsLost("won")
+  }
+
+  useFrame(() => {
+    if (isLost === "lost" && ghostRef.current) {
+      ghostRef.current.rotation.y += 0.01 // rotate continuously around Y axis
+    }
+    if (isLost === "won" && winnerRef.current) {
+      winnerRef.current.rotation.y += 0.01 // rotate continuously around Y axis
+    }
+  })
 
 
   return (
@@ -47,25 +75,50 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
 
           if (cell.isEnd) {
             return (
-              <Box
+              <RigidBody type="fixed" colliders={false} key={`${rowIndex}-${colIndex}-hazard`}>
+              <CuboidCollider
+                sensor
+                args={[0.5, 0.5, 0.5]}
+                position={[colIndex, 0.1, rowIndex]}
+                onIntersectionEnter={(payload: IntersectionEnterPayload) => {
+                  onWon(payload)
+                }}
+              />
+
+              {isLost==="won" ?
+                <React.Suspense>
+                  <PropLoader url={'/dancer_girl.glb'} position={[colIndex, 0.1, rowIndex]} scale={1} ref={winnerRef}></PropLoader>
+                </React.Suspense> :
+                <Box
                 key={`${rowIndex}-${colIndex}-end`}
                 position={[colIndex, 0.01, rowIndex]}
                 args={[1, 0.02, 1]}
               >
                 <meshStandardMaterial color="dodgerblue" emissive="blue" />
-              </Box>
+              </Box>}
+            </RigidBody>
+              
             );
           }
 
           if (cell.isHazard) {
             return (
-              <Box
-                key={`${rowIndex}-${colIndex}-hazard`}
-                position={[colIndex, 0.01, rowIndex]}
-                args={[1, 0.02, 1]}
-              >
-                <meshStandardMaterial color="red" emissive="darkred" />
-              </Box>
+              <RigidBody type="fixed" colliders={false} key={`${rowIndex}-${colIndex}-hazard`}>
+                <CuboidCollider
+                  sensor
+                  args={[0.5, 0.5, 0.5]}
+                  position={[colIndex, 0.1, rowIndex]}
+                  onIntersectionEnter={(payload: IntersectionEnterPayload) => {
+                    onLost(payload)
+                  }}
+                />
+
+                {isLost ?
+                  <React.Suspense>
+                    <PropLoader url={'/ghost_kitty.glb'} position={[colIndex, 0.01, rowIndex]} scale={0.3} ref={ghostRef}></PropLoader>
+                  </React.Suspense> :
+                  <TypeRender key={`${rowIndex}-${colIndex}`} rowIndex={rowIndex} colIndex={colIndex} cell={cell} />}
+              </RigidBody>
             );
           }
 
@@ -80,12 +133,12 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
               </Box>
             );
           }
-          
-            return (
-              <TypeRender key={`${rowIndex}-${colIndex}`} rowIndex={rowIndex} colIndex={colIndex} cell={cell} />
-            
-            );
-          })
+
+          return (
+            <TypeRender key={`${rowIndex}-${colIndex}`} rowIndex={rowIndex} colIndex={colIndex} cell={cell} />
+
+          );
+        })
       )}
       <CuboidCollider
         friction={2}
@@ -97,7 +150,7 @@ export const Maze = ({ mazeRef }: { mazeRef: React.RefObject<THREE.Group> }) => 
   );
 };
 
-const TypeRender = ({ rowIndex, colIndex, cell}: {rowIndex: number, colIndex: number, cell: MazeCell}) => {
+const TypeRender = ({ rowIndex, colIndex, cell }: { rowIndex: number, colIndex: number, cell: MazeCell }) => {
 
   const [diffuse, normal, rough] = useLoader(THREE.TextureLoader, [
     '/textures/rock_wall_13_diff_1k.jpg',
@@ -121,45 +174,46 @@ const TypeRender = ({ rowIndex, colIndex, cell}: {rowIndex: number, colIndex: nu
 
   switch (cell.type.type) {
     case 'wall':
-      { 
-      const props = cell.type.props
-      if(props) {
-        return (
-          <RigidBody type="fixed" colliders={false} key={`${rowIndex}-${colIndex}-wall`}>
-          <PropLoader url={props.url} position={[colIndex, props.positionY, rowIndex]} scale={props.scale} />
-          <CuboidCollider
-            args={[0.5, 0.5, 0.5]} // X, Y, Z half-sizes → 1x1x1 cube
-            position={[colIndex, 0.5, rowIndex]}
-          />
-         <Plane
-          args={[1, 1]}
-          rotation={[-Math.PI / 2, 0, 0]}
-          position={[colIndex, 0.01, rowIndex]}
-        >
-          <meshPhysicalMaterial emissiveIntensity={0.1} emissive={'green'} map={diffuse2} normalMap={normal2} roughnessMap={rough2}
-        roughness={1} sheenRoughness={0.5} />
-        </Plane> 
-          </RigidBody>
-        )
-      } else {
-        return (
-          <RigidBody type="fixed" colliders={false} key={`${rowIndex}-${colIndex}-wall`}>
-          <Box
-            onClick={() => {
-              console.log(cell.id)
-            }}
-            position={[colIndex, 0.5, rowIndex]} // Standard 1x1x1 cube
-            args={[1, 1, 1]}
-          >
-             <meshPhysicalMaterial map={diffuse} normalMap={normal} roughnessMap={rough} />
-          </Box>
-          <CuboidCollider
-            args={[0.5, 0.5, 0.5]} // X, Y, Z half-sizes → 1x1x1 cube
-            position={[colIndex, 0.5, rowIndex]}
-          />
-        </RigidBody>
-        )
-      } }
+      {
+        const props = cell.type.props
+        if (props) {
+          return (
+            <RigidBody type="fixed" colliders={false} key={`${rowIndex}-${colIndex}-wall`}>
+              <PropLoader url={props.url} position={[colIndex, props.positionY, rowIndex]} scale={props.scale} />
+              <CuboidCollider
+                args={[0.5, 0.5, 0.5]} // X, Y, Z half-sizes → 1x1x1 cube
+                position={[colIndex, 0.5, rowIndex]}
+              />
+              <Plane
+                args={[1, 1]}
+                rotation={[-Math.PI / 2, 0, 0]}
+                position={[colIndex, 0.01, rowIndex]}
+              >
+                <meshPhysicalMaterial emissiveIntensity={0.1} emissive={'green'} map={diffuse2} normalMap={normal2} roughnessMap={rough2}
+                  roughness={1} sheenRoughness={0.5} />
+              </Plane>
+            </RigidBody>
+          )
+        } else {
+          return (
+            <RigidBody type="fixed" colliders={false} key={`${rowIndex}-${colIndex}-wall`}>
+              <Box
+                onClick={() => {
+                  console.log(cell.id)
+                }}
+                position={[colIndex, 0.5, rowIndex]} // Standard 1x1x1 cube
+                args={[1, 1, 1]}
+              >
+                <meshPhysicalMaterial map={diffuse} normalMap={normal} roughnessMap={rough} />
+              </Box>
+              <CuboidCollider
+                args={[0.5, 0.5, 0.5]} // X, Y, Z half-sizes → 1x1x1 cube
+                position={[colIndex, 0.5, rowIndex]}
+              />
+            </RigidBody>
+          )
+        }
+      }
     case 'path':
       return <Box
         key={`${rowIndex}-${colIndex}-path`}
@@ -169,41 +223,77 @@ const TypeRender = ({ rowIndex, colIndex, cell}: {rowIndex: number, colIndex: nu
         <meshPhysicalMaterial emissiveIntensity={0.1} emissive={'green'} map={diffuse2} normalMap={normal2} roughnessMap={rough2}
           roughness={1} sheenRoughness={0.5} />
       </Box>
-    case 'prop':{
-      if(cell.type.props) {
+    case 'prop': {
+      if (cell.type.props) {
         return (
           <React.Fragment key={`${rowIndex}-${colIndex}-prop`}>
-          <Plane
-          args={[1, 1]}
-          rotation={[-Math.PI / 2, 0, 0]}
-          position={[colIndex, 0.01, rowIndex]}
-        >
-          <meshPhysicalMaterial emissiveIntensity={0.1} emissive={'green'} map={diffuse2} normalMap={normal2} roughnessMap={rough2}
-        roughness={1} sheenRoughness={0.5} />
-        </Plane> 
-          <PropLoader url={cell.type.props.url} position={[colIndex, cell.type.props.positionY, rowIndex]} scale={cell.type.props.scale} key={`${rowIndex}-${colIndex}-prop`} />
+            <Plane
+              args={[1, 1]}
+              rotation={[-Math.PI / 2, 0, 0]}
+              position={[colIndex, 0.01, rowIndex]}
+            >
+              <meshPhysicalMaterial emissiveIntensity={0.1} emissive={'green'} map={diffuse2} normalMap={normal2} roughnessMap={rough2}
+                roughness={1} sheenRoughness={0.5} />
+            </Plane>
+            <PropLoader url={cell.type.props.url} position={[colIndex, cell.type.props.positionY, rowIndex]} scale={cell.type.props.scale} key={`${rowIndex}-${colIndex}-prop`} />
           </React.Fragment>
         )
       }
       return null
     }
     default:
-      return null
+      return <Plane
+        args={[1, 1]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[colIndex, 0.01, rowIndex]}
+      >
+        <meshPhysicalMaterial emissiveIntensity={0.1} emissive={'green'} map={diffuse2} normalMap={normal2} roughnessMap={rough2}
+          roughness={1} sheenRoughness={0.5} />
+      </Plane>
   }
 }
 
-const PropLoader = ({ url, position, scale = 0.1 }: {
-  url: string,
-  position: [number, number, number],
+export const PropLoader = ({
+  url,
+  position,
+  scale = 0.1,
+  ref: externalRef
+}: {
+  url: string
+  position: [number, number, number]
   scale?: number
+  ref?: React.RefObject<THREE.Object3D>
 }) => {
-  const modelLoader = useLoader(GLTFLoader, url)
-  const clone = React.useMemo(() => modelLoader.scene.clone(true), [modelLoader]);
+  const model = useLoader(GLTFLoader, url)
+  const clonedScene = React.useMemo(() => model.scene.clone(true), [model.scene])
+  const groupRef = React.useRef<THREE.Group>(null)
+
+  // Combine internal and external refs
+  React.useEffect(() => {
+    if (externalRef && groupRef.current) {
+      (externalRef as React.MutableRefObject<THREE.Object3D>).current = groupRef.current
+    }
+  }, [externalRef])
+
+  const { actions, mixer } = useAnimations(model.animations, groupRef)
+
+  React.useEffect(() => {
+    const action = actions[model.animations[0]?.name]
+    action?.play()
+  }, [actions, model.animations])
+
+  // Update mixer (advance animation)
+  useFrame((_, delta) => {
+    mixer?.update(delta)
+  })
 
   return (
-    <mesh scale={scale} position={position}>
-      <primitive object={clone} />
-    </mesh>
+    <primitive
+      ref={groupRef}
+      object={clonedScene}
+      position={position}
+      scale={scale}
+    />
   )
 }
 

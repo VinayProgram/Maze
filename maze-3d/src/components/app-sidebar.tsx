@@ -22,7 +22,7 @@ import { Label } from "./ui/label"
 import { useMazeCellStore } from "@/store/mazeStore"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Separator } from "./ui/separator"
-import { HouseIcon, MountainIcon, TreesIcon } from "lucide-react"
+import { HouseIcon, MountainIcon, SpaceIcon, TreesIcon } from "lucide-react"
 import type { MazeCell } from "@/app/levels/maze"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -76,6 +76,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           scale:0.05
         }
       }
+    case "Trees_Junk":
+      return {
+        type: "prop",
+        props: {
+          url: "/trees_junk.glb",
+          positionY: 0,
+          scale:0.5
+        }
+      }
     default:
       return {
         type: "path",
@@ -117,6 +126,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const PropSubTypes = [
     { value: "Tree", label: "Tree", icon: TreesIcon },
     { value: "old-house", label: "Old House", icon: HouseIcon },
+    { value: "Trees_Junk", label: "Trees Junk", icon: TreesIcon },
   ]
   return (
     <Sidebar collapsible="offcanvas" {...props}>
