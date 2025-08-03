@@ -89,15 +89,9 @@ const GameOptionsPage = () => {
     )
   }, [])
 
-  const handlePlayGame = () => {
-    console.log("Navigate to Play Game")
-    // Add your navigation logic here
-  }
-
-  const handleDesignLevel = () => {
-    navigate.navigate({ to: '/level-design' })
-    // Add your navigation logic here
-  }
+  const handlePlayGame = (to:string) => {
+    navigate.navigate({ to: to })
+    }
 
   return (
     <div className="h-full w-full bg-gradient-to-br from-gray-900 via-purple-900 to-black relative overflow-hidden">
@@ -122,7 +116,7 @@ const GameOptionsPage = () => {
 
         <div className="flex flex-col md:flex-row gap-8 w-full max-w-4xl">
           {/* Play Game Card */}
-          <div className="play-card flex-1 group cursor-pointer" onClick={handlePlayGame}>
+          <div className="play-card flex-1 group cursor-pointer" >
             <div className="bg-gradient-to-br from-purple-800/30 to-pink-800/30 backdrop-blur-sm border border-purple-400/30 rounded-2xl p-8 h-80 flex flex-col justify-between hover:border-purple-400/60 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/20">
               <div>
                 <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl mb-6 flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
@@ -137,7 +131,7 @@ const GameOptionsPage = () => {
                   Dive into pre-built mazes with increasing difficulty. Master the art of navigation.
                 </p>
               </div>
-              <div className="flex items-center text-purple-400 group-hover:text-pink-400 transition-colors">
+              <div onClick={()=>handlePlayGame('/level')} className="flex items-center text-purple-400 group-hover:text-pink-400 transition-colors">
                 <span className="font-semibold">Start Adventure</span>
                 <svg className="w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -147,7 +141,7 @@ const GameOptionsPage = () => {
           </div>
 
           {/* Design Level Card */}
-          <div className="design-card flex-1 group cursor-pointer" onClick={handleDesignLevel}>
+          <div className="design-card flex-1 group cursor-pointer" onClick={()=>handlePlayGame('/design-level')}>
             <div className="bg-gradient-to-br from-pink-800/30 to-purple-800/30 backdrop-blur-sm border border-pink-400/30 rounded-2xl p-8 h-80 flex flex-col justify-between hover:border-pink-400/60 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-pink-500/20">
               <div>
                 <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-500 rounded-xl mb-6 flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">

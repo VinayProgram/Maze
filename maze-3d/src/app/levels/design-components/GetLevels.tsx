@@ -1,10 +1,6 @@
-// src/components/maze-levels-page.tsx
-
-"use client";
-
 import { useState, useEffect } from "react";
 import type { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
-import { Heart, User, Calendar, Search, Frown, Play, Edit2Icon } from "lucide-react";
+import { Heart, User, Calendar, Search, Frown, Play, EyeIcon } from "lucide-react";
 
 import { useMazeLevels } from "../services/get-levels";
 import {
@@ -130,7 +126,7 @@ export const MazeLevelsPage = () => {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-        <h1 className="text-3xl font-bold tracking-tight">Community Levels</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Levels</h1>
         <div className="relative w-full sm:max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
@@ -178,7 +174,7 @@ export const MazeLevelsPage = () => {
                     <Play className="mr-2 h-4 w-4" /> Play
                   </Button>
                   <Button variant="secondary" onClick={() => onEdit(level)}>
-                    <Edit2Icon className="mr-2 h-4 w-4" /> Copy-Edit
+                    <EyeIcon className="mr-2 h-4 w-4" /> View Level
                   </Button>
                 </CardFooter>
               </Card>

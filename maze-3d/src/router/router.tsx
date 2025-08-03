@@ -28,7 +28,7 @@ const LevelDesignRoute = createRoute({
 const ViewLevel = createRoute({
     getParentRoute: () => rootRoute,
     path: '/design-level',
-    component: ()=><DesignLevel currentStep={{"1": {mazeSize: [10, 10],"mazeName":"demo"},activeStep:2}}/>,
+    component: ()=><DesignLevel currentStep={{"1": {mazeSize: [10, 10],"mazeName":"view-only"},activeStep:2}}/>,
 })
 
 const Levels = createRoute({

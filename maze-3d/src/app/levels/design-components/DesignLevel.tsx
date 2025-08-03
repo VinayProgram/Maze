@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@radix-ui/react-separator"
 import type { SaveLevelDTO } from "../services/dto/save-level"
 import { saveMazeLevel } from "../services/save-level"
+import { toast } from "sonner"
 
 const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
   const mazeSize = currentStep[1].mazeSize
@@ -41,7 +42,7 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
   const [isDrawing, setIsDrawing] = React.useState(false)
   const [mazeState, setMazeState] = React.useState<MazeCell[][]>(level?level:maze)
   React.useEffect(() => {
-    resetMaze()
+    currentStep[1].mazeName=="view-only"?null:resetMaze()
   }, [])
   const updateMaze = (rowIndex: number, colIndex: number) => {
     const newMaze = [...mazeState]
@@ -99,7 +100,10 @@ const DesignLevel = ({ currentStep }: { currentStep: Step }) => {
   }
 
   const onSave = (e:React.MouseEvent<HTMLButtonElement>) => {
-    console.log('save')
+    if(currentStep[1].mazeName==="view-only"){
+      console.log("view-only")
+      return toast("Please enter a maze name before saving.")
+    }
     const saveLevelDTO:SaveLevelDTO = {
       id: mazeState[0][0].id,
       title: currentStep[1].mazeName,
